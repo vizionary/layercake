@@ -1,0 +1,7 @@
+- Interactive map with GeoJSON layer management
+- Color picker and point size adjustment for layers
+- Layer list with feature counts and styling options
+- Reset button with confirmation to remove all layers
+- Line width adjustment for GeoJSON layers
+- Responsive design with improved usability
+- Drag and drop file upload instructions

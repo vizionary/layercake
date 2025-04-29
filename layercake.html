@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layercake Simple Serverless GeoJSON Viewer</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+
+    <style>
+        /* Basic Reset & Full Height */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: sans-serif;
+            overflow: hidden; /* Prevent body scrollbars */
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            background-color: #f0f0f0; /* Placeholder background */
+        }
+
+        /* UI Panel Styling */
+        .ui-panel {
+            position: absolute;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000; /* Above map layers */
+            max-width: 300px;
+        }
+
+        #upload-box {
+            top: 10px;
+        }
+        #upload-box h2, #layer-list h2, #basemap-switcher h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+         #upload-box label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+         }
+         #upload-box input[type="file"] {
+             display: block;
+             margin-top: 5px;
+         }
+         #upload-box p {
+             font-size: 0.9em;
+             color: #555;
+             margin-top: 8px;
+         }
+
+        #basemap-switcher {
+            top: 130px; /* Adjusted position */
+        }
+        #basemap-switcher select {
+            width: 100%;
+            padding: 5px;
+        }
+
+        #layer-list {
+            top: 220px; /* Adjusted position */
+            max-height: calc(100vh - 240px); /* Adjust based on other panels */
+            overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scrollbar */
+            width: 400px; /* Increase from 350px to 400px */
+            max-width: calc(100vw - 20px); /* Responsive - prevent overflow on small screens */
+        }
+
+        /* Layer List Item Styling */
+        .layer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            gap: 8px; /* Slightly increase gap */
+            width: 100%; /* Ensure it takes full width of parent */
+        }
+        .layer-item:last-child {
+            border-bottom: none;
+        }
+
+        .layer-controls {
+            display: flex;
+            align-items: center;
+            gap: 3px; /* Reduced gap to fit more controls */
+        }
+        .layer-controls input[type="checkbox"] {
+            cursor: pointer;
+        }
+        
+        .color-picker {
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border: 1px solid #aaa;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 2px;
+            flex-shrink: 0;
+            /* Add these properties to ensure the input is clickable */
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: transparent; /* Let the value color show through */
+            overflow: hidden; /* Ensure the color fills the entire element */
+        }
+
+        /* Add this to make the color picker more interactive */
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+        .color-picker::-moz-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        .size-slider {
+            width: 60px;
+            height: 10px;
+            margin-right: 2px;
+            flex-shrink: 0;
+        }
+
+        .layer-label {
+            flex: 1; /* Takes remaining space */
+            cursor: pointer;
+            text-decoration: none;
+            color: #007bff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.95em;
+            min-width: 0; /* Allow proper text truncation */
+            padding-right: 5px; /* Add some padding to prevent text from touching the edge */
+        }
+        .layer-label:hover {
+            text-decoration: underline;
+        }
+
+
+        .delete-btn {
+            cursor: pointer;
+            color: red;
+            background: none;
+            border: none;
+            padding: 0 5px;
+            font-size: 1.1em;
+            font-weight: bold;
+            line-height: 1;
+             flex-shrink: 0; /* Prevent shrinking */
+        }
+        .delete-btn:hover {
+            color: darkred;
+        }
+
+
+        /* Drag and Drop Zone Styling */
+        #dropzone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            border: 5px dashed #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            font-size: 1.8em;
+            font-weight: bold;
+            z-index: 2000; /* Above everything */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        #dropzone.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Popup Styling */
+        .leaflet-popup-content {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px !important; /* Add some margin inside popup */
+        }
+
+        .popup-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .popup-table th, .popup-table td {
+            border: 1px solid #ddd;
+            padding: 4px 6px;
+            text-align: left;
+            max-width: 200px; /* Prevent overly wide columns */
+            word-wrap: break-word; /* Wrap long text */
+        }
+        .popup-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .popup-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .popup-controls {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .copy-btn {
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            background-color: #eee;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .copy-btn:hover {
+            background-color: #ddd;
+        }
+
+        /* Title Box Styling */
+        .title-box {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%);
+            padding: 12px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 300px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .title-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .title-box h1 {
+            margin: 0 0 5px 0;
+            font-size: 1.4em;
+            color: #333;
+        }
+
+        .title-box p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .feature-counter {
+            position: absolute;
+            top: 80px; /* Position it below the title box */
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 10px;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+            font-size: 0.85em;
+            color: #555;
+            z-index: 1000;
+        }
+
+        .feature-counter strong {
+            color: #007bff;
+        }
+
+        /* Reset Button Styling */
+        .reset-button {
+            position: absolute;
+            top: 120px; /* Position it below the feature counter */
+            right: 10px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            opacity: 0; /* Start hidden */
+            pointer-events: none; /* Start disabled */
+        }
+
+        .reset-button:hover {
+            background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .reset-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div class="title-box">
+        <h1>Layercake</h1>
+        <p>Simple Serverless GeoJSON Viewer</p>
+    </div>
+
+    <div class="feature-counter" id="feature-counter">
+        <span>No features loaded</span>
+    </div>
+
+    <!-- Add this after the feature-counter div -->
+    <button id="reset-button" class="reset-button" title="Remove all layers">
+        Reset Map
+    </button>
+
+    <div id="upload-box" class="ui-panel">
+        <h2>Upload GeoJSON</h2>
+        <label for="geojson-upload">Select file(s):</label>
+        <input type="file" id="geojson-upload" accept=".geojson,application/geo+json" multiple>
+        <p>Or drag &amp; drop GeoJSON files onto the map.</p>
+    </div>
+
+    <div id="basemap-switcher" class="ui-panel">
+        <h2>Base Map</h2>
+        <select id="basemap-select">
+            <option value="osm" selected>OpenStreetMap</option>
+            <option value="satellite">Satellite</option>
+            <option value="dark">Dark Matter</option>
+            <option value="topo">Topographic</option>
+        </select>
+    </div>
+
+    <div id="layer-list" class="ui-panel">
+        <h2>Loaded Layers</h2>
+        <!-- Layer items will be added here by JavaScript -->
+    </div>
+
+    <div id="dropzone">
+        <div>Drop GeoJSON file(s) here</div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Configuration ---
+            const MAX_LAYERS = 20; // Max number of layers allowed
+
+            // --- Map Initialization ---
+            const map = L.map('map', {
+                zoomControl: true // Keep default zoom control
+            }).setView([20, 0], 2); // Initial view (latitude, longitude, zoom level)
+
+            // --- Base Map Layers ---
+            const baseLayers = {
+                osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }),
+                satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+                }),
+                dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 20
+                }),
+                 topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 17,
+                    attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+                })
+            };
+
+            let currentBaseLayer = baseLayers.osm; // Default base layer
+            currentBaseLayer.addTo(map);
+
+            // --- State Management ---
+            let layers = []; // Array to store { id, name, color, pointSize, layer (Leaflet object), visible }
+
+            // --- DOM Element References ---
+            const fileInput = document.getElementById('geojson-upload');
+            const layerListDiv = document.getElementById('layer-list');
+            const basemapSelect = document.getElementById('basemap-select');
+            const dropzone = document.getElementById('dropzone');
+
+            // --- Utility Functions ---
+            function randomColor() {
+                // Generates a random hex color
+                return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            }
+
+            function updateFeatureCounter() {
+                const counterDiv = document.getElementById('feature-counter');
+                let totalFeatures = 0;
+                
+                layers.forEach(entry => {
+                    if (entry.visible) {
+                        let layerFeatures = 0;
+                        entry.layer.eachLayer(() => { layerFeatures++; });
+                        totalFeatures += layerFeatures;
+                    }
+                });
+                
+                if (totalFeatures === 0) {
+                    counterDiv.innerHTML = '<span>No features loaded</span>';
+                } else {
+                    counterDiv.innerHTML = `<span><strong>${totalFeatures}</strong> feature${totalFeatures !== 1 ? 's' : ''} loaded</span>`;
+                }
+            }
+
+            // Function to show/hide reset button based on layer count
+            function updateResetButtonVisibility() {
+                const resetButton = document.getElementById('reset-button');
+                if (layers.length > 0) {
+                    resetButton.classList.add('visible');
+                } else {
+                    resetButton.classList.remove('visible');
+                }
+            }
+
+            function createStyledPopup(properties) {
+                if (!properties || Object.keys(properties).length === 0) {
+                    return '<div>No properties found for this feature.</div>';
+                }
+
+                let tableHtml = '<table class="popup-table"><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>';
+                for (const [key, value] of Object.entries(properties)) {
+                    // Simple display for various types
+                    let displayValue;
+                    if (value === null) {
+                        displayValue = '<em>null</em>';
+                    } else if (typeof value === 'object') {
+                         // Avoid overly long stringification for nested objects/arrays in the table
+                        displayValue = JSON.stringify(value).length > 100 ? '[Object]' : JSON.stringify(value);
+                    } else {
+                        displayValue = String(value); // Convert numbers/booleans to string
+                    }
+                    // Basic HTML escaping for display
+                     const escapedKey = key.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                     const escapedValue = String(displayValue).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    tableHtml += `<tr><td>${escapedKey}</td><td>${escapedValue}</td></tr>`;
+                }
+                tableHtml += '</tbody></table>';
+
+                // Prepare JSON string for copy button
+                const jsonString = JSON.stringify(properties, null, 2);
+                // Escape potential issues for inline onclick attribute if using template literals
+                 // Using JSON.stringify again safely wraps the string in quotes for the attribute
+                const escapedJsonString = JSON.stringify(jsonString);
+
+                const controlsHtml = `
+                    <div class="popup-controls">
+                        <button class="copy-btn" onclick='copyProperties(${escapedJsonString}, this)'>Copy Properties (JSON)</button>
+                    </div>`;
+
+                return tableHtml + controlsHtml;
+            }
+
+             // Make copy function globally accessible for inline onclick
+            window.copyProperties = function(jsonString, buttonElement) {
+                navigator.clipboard.writeText(jsonString)
+                    .then(() => {
+                        buttonElement.textContent = 'Copied!';
+                        setTimeout(() => { buttonElement.textContent = 'Copy Properties (JSON)'; }, 2000); // Reset button text
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy properties: ', err);
+                        alert('Failed to copy properties to clipboard.');
+                    });
+            }
+
+
+            // --- Core Logic Functions ---
+
+            // Helper function to check if a GeoJSON layer has point features
+            function hasPointFeatures(layer) {
+                let hasPoints = false;
+                layer.eachLayer(l => {
+                    if (l instanceof L.CircleMarker) {
+                        hasPoints = true;
+                    }
+                });
+                return hasPoints;
+            }
+
+            // Helper function to check if a GeoJSON layer has line features
+            function hasLineFeatures(layer) {
+                let hasLines = false;
+                layer.eachLayer(l => {
+                    if (l instanceof L.Polyline && !(l instanceof L.Polygon) && !(l instanceof L.CircleMarker)) {
+                        hasLines = true;
+                    }
+                });
+                return hasLines;
+            }
+
+            // Function to update the style of existing layers
+            function updateLayerStyle(entry) {
+                const { color, pointSize = 6, lineWidth = 2 } = entry;
+                
+                // For polygons and lines
+                entry.layer.setStyle({
+                    color: color,
+                    fillColor: color,
+                    weight: lineWidth, // Use the lineWidth property
+                    opacity: 0.8,
+                    fillOpacity: 0.4
+                });
+                
+                // For points (CircleMarkers)
+                entry.layer.eachLayer(layer => {
+                    if (layer instanceof L.CircleMarker) {
+                        layer.setStyle({
+                            radius: pointSize,
+                            fillColor: color,
+                            color: '#333', // Darker border for points
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        });
+                    }
+                });
+            }
+
+            function renderGeoJSON(geojson, filename = 'Loaded Layer') {
+                // Enforce layer limit: Remove the oldest layer if exceeding max
+                if (layers.length >= MAX_LAYERS) {
+                    const oldestLayer = layers[0];
+                    console.log(`Max layers (${MAX_LAYERS}) reached. Removing oldest layer: ${oldestLayer.name}`);
+                    removeLayer(oldestLayer.id, false); // Remove without confirmation
+                }
+
+                const layerColor = randomColor();
+                const defaultPointSize = 6;
+                const layerId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
+                let geojsonLayer;
+
+                try {
+                     geojsonLayer = L.geoJSON(geojson, {
+                        style: (feature) => {
+                            // Style for polygons and lines
+                            return {
+                                color: layerColor,
+                                weight: feature.geometry?.type === 'Point' ? 0 : 2, // No border for points styled by pointToLayer
+                                opacity: 0.8,
+                                fillColor: layerColor, // Fill color for polygons
+                                fillOpacity: 0.4
+                            };
+                        },
+                        pointToLayer: (feature, latlng) => {
+                            // Style for points -> CircleMarkers
+                            return L.circleMarker(latlng, {
+                                radius: defaultPointSize,
+                                fillColor: layerColor,
+                                color: '#333', // Darker border for points
+                                weight: 1,
+                                opacity: 1,
+                                fillOpacity: 0.8
+                            });
+                        },
+                        onEachFeature: (feature, layer) => {
+                            // Bind popup to each feature
+                            const popupContent = createStyledPopup(feature.properties);
+                             layer.bindPopup(popupContent, {
+                                maxHeight: 300, // Prevent excessively tall popups
+                                maxWidth: 400   // Prevent excessively wide popups
+                             });
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error creating Leaflet GeoJSON layer:", error);
+                    alert(`Error processing GeoJSON data in "${filename}": ${error.message}`);
+                    return; // Stop processing this file
+                }
+
+
+                geojsonLayer.addTo(map);
+
+                const layerEntry = {
+                    id: layerId,
+                    name: filename,
+                    color: layerColor,
+                    pointSize: defaultPointSize,
+                    lineWidth: 2, // Default line width
+                    layer: geojsonLayer,
+                    visible: true
+                };
+                layers.push(layerEntry);
+
+                updateLayerList();
+                zoomToAllVisibleLayers();
+                updateFeatureCounter();
+                updateResetButtonVisibility();
+            }
+
+            function updateLayerList() {
+                // Clear existing list items (keep the title)
+                const existingItems = layerListDiv.querySelectorAll('.layer-item');
+                existingItems.forEach(item => item.remove());
+
+                // Add items for each layer in reverse order (newest on top)
+                [...layers].reverse().forEach(entry => {
+                    const item = document.createElement('div');
+                    item.className = 'layer-item';
+                    item.dataset.layerId = entry.id;
+
+                    const controls = document.createElement('div');
+                    controls.className = 'layer-controls';
+
+                    // Visibility Checkbox
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = entry.visible;
+                    checkbox.title = 'Toggle visibility';
+                    checkbox.addEventListener('change', () => {
+                        entry.visible = checkbox.checked;
+                        if (entry.visible) {
+                            map.addLayer(entry.layer);
+                        } else {
+                            map.removeLayer(entry.layer);
+                        }
+                        zoomToAllVisibleLayers(); // Adjust zoom after visibility change
+                        updateFeatureCounter(); // Update feature count
+                    });
+
+                    // Color Picker
+                    const colorPicker = document.createElement('input');
+                    colorPicker.type = 'color';
+                    colorPicker.value = entry.color;
+                    colorPicker.className = 'color-picker';
+                    colorPicker.title = 'Change layer color';
+                    colorPicker.addEventListener('input', () => {
+                        // Update the color in our state
+                        entry.color = colorPicker.value;
+                        // Apply the new color to the layer
+                        updateLayerStyle(entry);
+                    });
+
+                    // Point Size Slider (only for layers with points)
+                    if (hasPointFeatures(entry.layer)) {
+                        const sizeSlider = document.createElement('input');
+                        sizeSlider.type = 'range';
+                        sizeSlider.min = '2';
+                        sizeSlider.max = '15';
+                        sizeSlider.value = entry.pointSize || '6'; // Default to 6 if not set
+                        sizeSlider.className = 'size-slider';
+                        sizeSlider.title = 'Adjust point size';
+                        sizeSlider.addEventListener('input', () => {
+                            // Update the point size in our state
+                            entry.pointSize = parseInt(sizeSlider.value);
+                            // Apply the new size to the layer
+                            updateLayerStyle(entry);
+                        });
+                        controls.appendChild(sizeSlider);
+                    }
+
+                    // Line Width Slider (only for layers with lines)
+                    if (hasLineFeatures(entry.layer)) {
+                        const lineWidthSlider = document.createElement('input');
+                        lineWidthSlider.type = 'range';
+                        lineWidthSlider.min = '1';
+                        lineWidthSlider.max = '10';
+                        lineWidthSlider.value = entry.lineWidth || '2'; // Default to 2 if not set
+                        lineWidthSlider.className = 'size-slider';
+                        lineWidthSlider.title = 'Adjust line width';
+                        lineWidthSlider.addEventListener('input', () => {
+                            // Update the line width in our state
+                            entry.lineWidth = parseInt(lineWidthSlider.value);
+                            // Apply the new width to the layer
+                            updateLayerStyle(entry);
+                        });
+                        controls.appendChild(lineWidthSlider);
+                    }
+
+                    // Delete Button
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.innerHTML = '&times;'; // Multiplication sign as 'X'
+                    deleteBtn.title = 'Remove layer';
+                    deleteBtn.addEventListener('click', () => {
+                       removeLayer(entry.id, true); // Remove with confirmation
+                    });
+
+                    controls.appendChild(checkbox);
+                    controls.appendChild(colorPicker);
+                    controls.appendChild(deleteBtn);
+
+                    // Layer Label (clickable to zoom)
+                    const label = document.createElement('span');
+                    label.className = 'layer-label';
+                    
+                    // Count features in this layer
+                    let featureCount = 0;
+                    entry.layer.eachLayer(() => { featureCount++; });
+                    
+                    label.textContent = entry.name;
+                    label.title = `Zoom to layer: ${entry.name} (${featureCount} feature${featureCount !== 1 ? 's' : ''})`;
+                    label.addEventListener('click', () => {
+                        zoomToLayer(entry.id);
+                    });
+                    
+                    // Add feature count to label
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'feature-count';
+                    countSpan.textContent = ` (${featureCount} feature${featureCount !== 1 ? 's' : ''})`;
+                    countSpan.style.fontSize = '0.85em';
+                    countSpan.style.color = '#666';
+                    countSpan.style.fontWeight = 'normal';
+                    countSpan.style.whiteSpace = 'nowrap'; /* Prevent wrapping of feature count */
+                    label.appendChild(countSpan);
+
+
+                    // Append elements to item
+                    item.appendChild(controls);
+                    item.appendChild(label);
+
+
+                    // Append item to list
+                    layerListDiv.appendChild(item);
+                });
+            }
+
+            function removeLayer(layerId, confirmDeletion = true) {
+                 const layerIndex = layers.findIndex(l => l.id === layerId);
+                 if (layerIndex === -1) return; // Layer not found
+
+                 const layerToRemove = layers[layerIndex];
+
+                 const doRemove = () => {
+                     map.removeLayer(layerToRemove.layer); // Remove from map
+                     layers.splice(layerIndex, 1); // Remove from state array
+                     updateLayerList(); // Update UI list
+                     zoomToAllVisibleLayers(); // Adjust zoom
+                     updateFeatureCounter(); // Update feature count
+                     updateResetButtonVisibility(); // Update reset button visibility
+                 };
+
+                 if (confirmDeletion) {
+                     if (confirm(`Are you sure you want to remove the layer "${layerToRemove.name}"?`)) {
+                         doRemove();
+                     }
+                 } else {
+                    // For automatic removal (layer limit), don't confirm
+                     doRemove();
+                 }
+            }
+
+            function zoomToLayer(layerId) {
+                const entry = layers.find(l => l.id === layerId);
+                if (entry && entry.layer) {
+                    try {
+                        const bounds = entry.layer.getBounds();
+                        // Check if bounds are valid (layer might be empty or have invalid geometry)
+                        if (bounds.isValid()) {
+                            map.fitBounds(bounds, { padding: [50, 50] }); // Add padding
+                        } else {
+                            console.warn(`Cannot zoom to layer "${entry.name}" because its bounds are invalid.`);
+                             // Maybe zoom to a default view or do nothing
+                             map.setView(map.getCenter(), map.getZoom()); // Stay put
+                        }
+                    } catch (error) {
+                        console.error(`Error getting bounds for layer "${entry.name}":`, error);
+                        alert(`Could not determine the extent of layer "${entry.name}".`);
+                    }
+                }
+            }
+
+            function zoomToAllVisibleLayers() {
+                 const visibleLeafletLayers = layers
+                    .filter(l => l.visible && l.layer) // Filter for visible layers that have a Leaflet layer object
+                    .map(l => l.layer);
+
+                if (visibleLeafletLayers.length === 0) {
+                    // No visible layers, maybe reset view or do nothing
+                     map.setView([20, 0], 2); // Reset to initial view
+                    return;
+                }
+
+                try {
+                    const group = L.featureGroup(visibleLeafletLayers);
+                    const bounds = group.getBounds();
+                    if (bounds.isValid()) {
+                         map.fitBounds(bounds, { padding: [50, 50] }); // Add padding
+                    } else {
+                        console.warn("Cannot fit bounds for all visible layers; calculated bounds are invalid.");
+                        // Fallback if combined bounds are somehow invalid
+                        map.setView([20, 0], 2);
+                    }
+                } catch (error) {
+                    console.error("Error creating feature group or getting bounds for visible layers:", error);
+                     // Fallback in case of error during grouping/bounds calculation
+                     map.setView([20, 0], 2);
+                }
+            }
+
+            function handleFiles(fileList) {
+                 if (!fileList || fileList.length === 0) return;
+
+                 // Convert FileList to Array and process each file
+                 Array.from(fileList).forEach(file => {
+                     // Basic check for GeoJSON extension or MIME type
+                     if (!file.name.toLowerCase().endsWith('.geojson') && file.type !== 'application/geo+json') {
+                        console.warn(`Skipping file "${file.name}" as it does not appear to be a GeoJSON file.`);
+                        // Optionally alert the user: alert(`Skipping file "${file.name}": Incorrect file type.`);
+                        return; // Skip this file
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = (e) => {
+                        try {
+                            const geojsonData = JSON.parse(e.target.result);
+                            // Basic validation: Check for 'type' and 'features' (for FeatureCollection) or 'geometry'
+                            if (!geojsonData || !geojsonData.type || !(geojsonData.features || geojsonData.geometry)) {
+                                throw new Error("Invalid GeoJSON structure.");
+                            }
+                             renderGeoJSON(geojsonData, file.name);
+                        } catch (error) {
+                            console.error(`Error parsing JSON from file "${file.name}":`, error);
+                            alert(`Failed to parse GeoJSON file "${file.name}". Ensure it's valid JSON.\nError: ${error.message}`);
+                        }
+                    };
+
+                     reader.onerror = (e) => {
+                         console.error(`Error reading file "${file.name}":`, e);
+                         alert(`Error reading file "${file.name}".`);
+                     };
+
+                    reader.readAsText(file); // Read the file as text
+                 });
+            }
+
+            // --- Event Listeners Setup ---
+
+            // File Input Change
+            fileInput.addEventListener('change', (event) => {
+                handleFiles(event.target.files);
+                // Reset the input value to allow uploading the same file again
+                event.target.value = '';
+            });
+
+            // Basemap Switcher Change
+            basemapSelect.addEventListener('change', (event) => {
+                const selectedValue = event.target.value;
+                if (baseLayers[selectedValue] && currentBaseLayer !== baseLayers[selectedValue]) {
+                    map.removeLayer(currentBaseLayer); // Remove the old one
+                    currentBaseLayer = baseLayers[selectedValue]; // Update reference
+                    currentBaseLayer.addTo(map); // Add the new one
+                }
+            });
+
+            // Drag and Drop Listeners (on window for full coverage)
+             let dragCounter = 0; // Counter to handle nested elements during drag
+
+            window.addEventListener('dragenter', (e) => {
+                e.preventDefault();
+                dragCounter++;
+                // Only show dropzone if dragged items potentially contain files
+                 if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+                     dropzone.classList.add('active');
+                 }
+            });
+
+            window.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Necessary to allow drop
+                 // Optional: Add visual feedback on dropzone during dragover
+            });
+
+            window.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dragCounter--;
+                if (dragCounter === 0) {
+                    dropzone.classList.remove('active');
+                }
+            });
+
+            window.addEventListener('drop', (e) => {
+                e.preventDefault(); // Prevent default browser file handling
+                dragCounter = 0; // Reset counter
+                dropzone.classList.remove('active');
+
+                if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+
+            // Reset button click handler
+            document.getElementById('reset-button').addEventListener('click', () => {
+                if (layers.length === 0) return;
+                
+                if (confirm('Are you sure you want to remove all layers from the map?')) {
+                    // Remove all layers from the map
+                    layers.forEach(entry => {
+                        map.removeLayer(entry.layer);
+                    });
+                    
+                    // Clear the layers array
+                    layers = [];
+                    
+                    // Update UI
+                    updateLayerList();
+                    updateFeatureCounter();
+                    updateResetButtonVisibility();
+                    
+                    // Reset map view to default
+                    map.setView([20, 0], 2);
+                }
+            });
+
+            // Initial UI Update (in case of any default layers - none here yet)
+            updateLayerList();
+            updateResetButtonVisibility();
+
+        }); // End DOMContentLoaded
+    </script>
+
+</body>
+</html>
