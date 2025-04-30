@@ -1,0 +1,2 @@
+africa.geojson is public domain, available at https://github.com/AshKyd/geojson-regions
+ne_*.geojson files are public domain, available at: https://geojson.xyz/
