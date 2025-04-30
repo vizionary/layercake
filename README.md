@@ -41,12 +41,26 @@ We created Layercake to solve common challenges when working with geospatial dat
 - **Layer Duplication**: Create copies of existing layers
 - **Context Menu**: Right-click on features in the table for additional options
 
+## Example Data
+
+The repository includes several example GeoJSON files in the `examples` directory that you can use to test Layercake:
+
+- `africa.geojson` - Boundary data for the African continent
+- `ne_10m_reefs.geojson` - Global reef locations at 1:10m scale
+- `ne_50m_populated_places.geojson` - Major populated places around the world
+- `ne_50m_urban_areas.geojson` - Urban area boundaries at 1:50m scale
+
+These files are from public domain sources:
+- Africa data from [geojson-regions](https://github.com/AshKyd/geojson-regions)
+- Natural Earth data from [geojson.xyz](https://geojson.xyz/)
+
 ## How to Use Layercake
 
 ### Map View
 1. **Load Data**: 
    - Click "Select file(s)" to upload GeoJSON files
    - Or drag and drop GeoJSON files directly onto the map
+   - Try with the example files in the `examples` directory
 
 2. **Manage Layers**:
    - Toggle layer visibility with the checkbox
@@ -117,6 +131,12 @@ The application is designed to be lightweight and dependency-free, making it eas
 ## Getting Started
 
 Simply open `layercake.html` in any modern web browser. No installation, server, or internet connection required (except for loading basemaps).
+
+## Contributing
+
+Want to help make Layercake better? Check out our [development roadmap](TODO.md) and pick something that looks interesting. 
+
+No need to be an expert - we welcome contributions from everyone.
 
 ## License
 
