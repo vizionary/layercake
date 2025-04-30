@@ -11,6 +11,141 @@
           crossorigin=""/>
 
     <style>
+        /* Theme Variables */
+        :root {
+            /* Light mode colors */
+            --light-bg: #ffffff;
+            --light-text: #333333;
+            --light-text-secondary: #666666;
+            --light-panel-bg: rgba(255, 255, 255, 0.95);
+            --light-border: #dddddd;
+            --light-hover: #f0f0f0;
+            --light-accent: #3498db;
+            --light-accent-hover: #2980b9;
+            --light-danger: #e74c3c;
+            --light-success: #2ecc71;
+            --light-warning: #f39c12;
+            
+            /* Dark mode colors */
+            --dark-bg: #1a1a1a;
+            --dark-panel-bg: rgba(40, 40, 40, 0.95);
+            --dark-text: #e0e0e0;
+            --dark-text-secondary: #aaaaaa;
+            --dark-border: #444444;
+            --dark-hover: #333333;
+            --dark-accent: #2980b9;
+            --dark-accent-hover: #3498db;
+            --dark-danger: #c0392b;
+            --dark-success: #27ae60;
+            --dark-warning: #d35400;
+            
+            /* Default to dark mode */
+            --bg: var(--dark-bg);
+            --panel-bg: var(--dark-panel-bg);
+            --text: var(--dark-text);
+            --text-secondary: var(--dark-text-secondary);
+            --border: var(--dark-border);
+            --hover: var(--dark-hover);
+            --accent: var(--dark-accent);
+            --accent-hover: var(--dark-accent-hover);
+            --danger: var(--dark-danger);
+            --success: var(--dark-success);
+            --warning: var(--dark-warning);
+        }
+
+        /* Theme Toggle Styling */
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1002;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--accent);
+            transition: .4s;
+            border: 2px solid var(--border);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #333;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(28px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        .toggle-icon {
+            position: absolute;
+            top: 5px;
+            font-size: 16px;
+            transition: opacity 0.3s;
+        }
+
+        .toggle-icon.light {
+            right: 8px;
+            opacity: 0;
+        }
+
+        .toggle-icon.dark {
+            left: 8px;
+            opacity: 1;
+        }
+
+        input:checked + .slider .toggle-icon.light {
+            opacity: 0;
+        }
+
+        input:checked + .slider .toggle-icon.dark {
+            opacity: 1;
+        }
+
+        input:not(:checked) + .slider .toggle-icon.light {
+            opacity: 1;
+        }
+
+        input:not(:checked) + .slider .toggle-icon.dark {
+            opacity: 0;
+        }
+        
         /* Basic Reset & Full Height */
         html, body {
             margin: 0;
@@ -26,6 +161,276 @@
             background-color: #f0f0f0; /* Placeholder background */
         }
 
+        /* Tab Container Styling */
+        .tab-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .tab-buttons {
+            display: flex;
+            padding: 10px 10px 0;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .tab-button.active {
+            background: white;
+            font-weight: bold;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #e0e0e0;
+        }
+
+        /* Tab Content Styling */
+        .tab-content {
+            position: absolute;
+            top: 50px; /* Height of tab buttons */
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .tab-pane {
+            display: none;
+            height: 100%;
+            width: 100%;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Table View Styling */
+        .table-controls {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+            gap: 8px;
+        }
+
+        .table-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-controls select, 
+        .table-controls input {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .table-info {
+            margin-left: auto;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* Clear button inside search input */
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding-right: 30px; /* Space for the clear button */
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            display: none; /* Hidden by default */
+        }
+
+        .search-clear:hover {
+            color: #333;
+        }
+
+        /* Selection controls */
+        .selection-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .control-button {
+            padding: 6px 10px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+
+        .control-button:hover {
+            background: #e0e0e0;
+        }
+
+        .control-button.primary {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .control-button.primary:hover {
+            background: #2980b9;
+        }
+
+        .selection-count {
+            margin-left: auto;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* Checkbox column */
+        .checkbox-cell {
+            text-align: center;
+            width: 30px;
+        }
+
+        .feature-checkbox {
+            cursor: pointer;
+        }
+
+        /* Selected row styling */
+        #feature-table tr.selected {
+            background-color: #e3f2fd;
+        }
+
+        #feature-table tr.selected:nth-child(even) {
+            background-color: #d6eaf8;
+        }
+
+        #feature-table tr.selected:hover {
+            background-color: #bbdefb;
+        }
+
+        /* Virtualized Table Styling */
+        .table-container {
+            position: relative;
+            height: calc(100% - 50px);
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .virtual-spacer {
+            position: absolute;
+            width: 1px;
+            opacity: 0;
+            pointer-events: none;
+            left: 0;
+            top: 0;
+        }
+
+        #feature-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        #feature-table.virtualized {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #feature-table th, 
+        #feature-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #feature-table th {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            font-weight: bold;
+        }
+
+        #feature-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        #feature-table tr:hover {
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+
+        #feature-table tr.highlighted {
+            background-color: #e3f2fd;
+        }
+
+        /* Add a loading indicator for the table */
+        .table-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+            display: none;
+        }
+
+        .table-loading.active {
+            display: block;
+        }
+
+        .table-loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* UI Panel Styling */
         .ui-panel {
             position: absolute;
@@ -39,7 +444,7 @@
         }
 
         #upload-box {
-            top: 10px;
+            top: 60px; /* Adjusted for tab bar */
         }
         #upload-box h2, #layer-list h2, #basemap-switcher h2 {
             margin-top: 0;
@@ -62,7 +467,7 @@
          }
 
         #basemap-switcher {
-            top: 130px; /* Adjusted position */
+            top: 180px; /* Adjusted for tab bar */
         }
         #basemap-switcher select {
             width: 100%;
@@ -70,8 +475,8 @@
         }
 
         #layer-list {
-            top: 220px; /* Adjusted position */
-            max-height: calc(100vh - 240px); /* Adjust based on other panels */
+            top: 270px; /* Adjusted for tab bar */
+            max-height: calc(100vh - 290px); /* Adjusted for tab bar */
             overflow-y: auto;
             overflow-x: hidden; /* Prevent horizontal scrollbar */
             width: 400px; /* Increase from 350px to 400px */
@@ -170,6 +575,21 @@
             color: darkred;
         }
 
+        .rename-btn {
+            cursor: pointer;
+            color: #555;
+            background: none;
+            border: none;
+            padding: 0 3px;
+            font-size: 1em;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+        .rename-btn:hover {
+            color: #007bff;
+        }
+
 
         /* Drag and Drop Zone Styling */
         #dropzone {
@@ -247,38 +667,82 @@
         /* Title Box Styling */
         .title-box {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,240,240,0.95) 100%);
-            padding: 12px 15px;
+            bottom: 20px; /* Position at bottom instead of top */
+            left: 20px; /* Position at left instead of right */
+            background: rgba(0, 0, 0, 0.6); /* Dark semi-transparent background */
+            color: white; /* White text for better contrast */
+            padding: 10px 15px;
             border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
             z-index: 1000;
             max-width: 300px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            backdrop-filter: blur(5px); /* Add blur effect for modern browsers */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
-        .title-box:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        .title-box.collapsed {
+            transform: translateY(calc(100% - 40px));
+        }
+
+        .title-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            cursor: pointer;
         }
 
         .title-box h1 {
-            margin: 0 0 5px 0;
+            margin: 0;
             font-size: 1.4em;
-            color: #333;
+            color: white;
+        }
+
+        .title-box-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .title-box p {
             margin: 0;
             font-size: 0.9em;
-            color: #666;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Light mode version */
+        [data-theme="light"] .title-box {
+            background: rgba(255, 255, 255, 0.8);
+            color: #333;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .title-box h1 {
+            color: #333;
+        }
+
+        [data-theme="light"] .title-box-toggle {
+            color: #333;
+        }
+
+        [data-theme="light"] .title-box p {
+            color: rgba(0, 0, 0, 0.7);
         }
 
         .feature-counter {
             position: absolute;
-            top: 80px; /* Position it below the title box */
+            top: 130px; /* Adjusted for tab bar */
             right: 10px;
             background: rgba(255, 255, 255, 0.9);
             padding: 6px 10px;
@@ -293,10 +757,156 @@
             color: #007bff;
         }
 
+        /* Context Menu Styling */
+        .context-menu {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            padding: 5px 0;
+            z-index: 2000;
+            min-width: 150px;
+        }
+
+        .context-menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+
+        .context-menu-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .context-menu-item i {
+            margin-right: 8px;
+            color: #555;
+            font-style: normal;
+        }
+
+        /* Feature Detail Modal */
+        .feature-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-detail-content {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 1000px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .feature-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .feature-detail-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .feature-detail-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #777;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .feature-detail-close:hover {
+            color: #333;
+        }
+
+        .feature-detail-body {
+            display: flex;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .feature-detail-map {
+            flex: 1;
+            min-height: 300px;
+            border-right: 1px solid #ddd;
+        }
+
+        .feature-detail-info {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .feature-property {
+            margin-bottom: 12px;
+        }
+
+        .property-name {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 3px;
+        }
+
+        .property-value {
+            padding: 5px 8px;
+            background: #f9f9f9;
+            border-radius: 3px;
+            border: 1px solid #eee;
+            word-break: break-word;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .property-value.object-value {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 768px) {
+            .feature-detail-body {
+                flex-direction: column;
+            }
+            
+            .feature-detail-map {
+                height: 40%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            .feature-detail-info {
+                height: 60%;
+            }
+        }
+
         /* Reset Button Styling */
         .reset-button {
             position: absolute;
-            top: 120px; /* Position it below the feature counter */
+            top: 170px; /* Adjusted for tab bar */
             right: 10px;
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
             color: white;
@@ -312,6 +922,203 @@
             opacity: 0; /* Start hidden */
             pointer-events: none; /* Start disabled */
         }
+        
+        /* Layer Editor Modal Styling */
+        .layer-editor-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layer-editor-content {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modal-appear 0.2s ease-out;
+        }
+
+        @keyframes modal-appear {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .layer-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .layer-editor-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .layer-editor-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #777;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .layer-editor-close:hover {
+            color: #333;
+        }
+
+        .layer-editor-form {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .layer-name-input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: right;
+            color: #666;
+        }
+
+        .layer-stats {
+            background: #f9f9f9;
+            padding: 12px 15px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .layer-stats-item {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+
+        .layer-stats-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .layer-stats-label {
+            font-weight: bold;
+            margin-right: 8px;
+            color: #555;
+        }
+
+        .layer-editor-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 0 20px 20px;
+        }
+
+        .action-button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        .action-button:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .action-button.primary {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .action-button.primary:hover {
+            background: #2980b9;
+        }
+
+        .action-button.danger {
+            background: #e74c3c;
+            color: white;
+            border-color: #c0392b;
+        }
+
+        .action-button.danger:hover {
+            background: #c0392b;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .layer-editor-content {
+                width: 95%;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            .layer-editor-actions {
+                grid-template-columns: 1fr;
+            }
+        }
 
         .reset-button:hover {
             background: linear-gradient(135deg, #ff5252 0%, #d32f2f 100%);
@@ -324,50 +1131,927 @@
             pointer-events: auto;
         }
 
+        /* Warning Modal Styling */
+        .warning-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .warning-content {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .warning-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #f39c12;
+        }
+
+        .warning-content h3 {
+            margin: 0 0 15px 0;
+            color: #e74c3c;
+            font-size: 1.3em;
+        }
+
+        .warning-content p {
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        .warning-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .warning-button {
+            padding: 10px 16px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .warning-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .warning-button.cancel {
+            background: #f1f1f1;
+            color: #333;
+        }
+
+        .warning-button.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .warning-button.proceed {
+            background: #3498db;
+            color: white;
+        }
+
+        .warning-button.proceed:hover {
+            background: #2980b9;
+        }
+
+        .warning-button.proceed.danger {
+            background: #e74c3c;
+        }
+
+        .warning-button.proceed.danger:hover {
+            background: #c0392b;
+        }
+
+        .warning-button.sample {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .warning-button.sample:hover {
+            background: #27ae60;
+        }
+
+        /* Sampling Notification Styling */
+        .sampling-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            z-index: 2000;
+            max-width: 400px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease-out;
+        }
+        
+        /* Success notification styling */
+        .sampling-notification.success {
+            border-left-color: #2ecc71;
+        }
+
+        .sampling-notification.success .notification-icon {
+            color: #2ecc71;
+        }
+
+        .sampling-notification.warning {
+            border-left-color: #f39c12;
+        }
+
+        .sampling-notification.warning .notification-icon {
+            color: #f39c12;
+        }
+
+        .sampling-notification.notification-visible {
+            transform: translateX(0);
+        }
+
+        .sampling-notification.notification-hiding {
+            transform: translateX(120%);
+        }
+
+        .notification-icon {
+            font-size: 1.5em;
+            margin-right: 12px;
+            color: #3498db;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-content h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .notification-content p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            color: #999;
+            padding: 0 0 0 10px;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+
+        .notification-clear-highlights {
+            background: #f1f1f1;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            margin-right: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.2s;
+        }
+
+        .notification-clear-highlights:hover {
+            background: #e0e0e0;
+        }
+
+        /* Visual indicators for active filters */
+        .filter-active {
+            border-color: #3498db;
+            box-shadow: 0 0 0 1px #3498db;
+        }
+
+        .control-button.active {
+            background-color: #f39c12;
+            color: white;
+            border-color: #e67e22;
+        }
+
+        .control-button.active:hover {
+            background-color: #e67e22;
+        }
+        
+        /* I/O Tab Styling */
+        .io-container {
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .io-sections-wrapper {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .io-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .import-section, .export-section {
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+
+        .io-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .io-group {
+            margin-bottom: 20px;
+        }
+
+        .io-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .io-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .geojson-textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            resize: vertical;
+        }
+
+        .url-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .url-input-container input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .io-button {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .io-button:hover {
+            background: #e0e0e0;
+        }
+
+        .io-button.primary {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+
+        .io-button.primary:hover {
+            background: #2980b9;
+        }
+
+        .file-drop-area {
+            border: 2px dashed #ccc;
+            border-radius: 6px;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            transition: all 0.2s;
+            background: #f9f9f9;
+        }
+
+        .file-drop-area.active {
+            border-color: #3498db;
+            background: #ecf0f1;
+        }
+
+        .file-message {
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .file-drop-area input[type="file"] {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .file-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .file-button:hover {
+            background: #2980b9;
+        }
+
+        .export-layers {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+
+        .export-layer-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .export-layer-item:last-child {
+            border-bottom: none;
+        }
+
+        .export-layer-item label {
+            margin: 0;
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .export-layer-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .export-layer-name {
+            flex: 1;
+        }
+
+        .export-layer-count {
+            color: #777;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        .export-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-label, .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .radio-label input, .checkbox-label input {
+            margin-right: 10px;
+        }
+
+        .no-layers-message {
+            padding: 20px;
+            text-align: center;
+            color: #777;
+            font-style: italic;
+        }
+
+        /* Add responsive behavior for smaller screens */
+        @media (max-width: 900px) {
+            .io-sections-wrapper {
+                flex-direction: column;
+            }
+            
+            .io-section {
+                max-height: none;
+            }
+            
+            .import-section {
+                margin-bottom: 20px;
+            }
+            
+            .button-row {
+                flex-direction: row;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .io-container {
+                padding: 10px;
+            }
+            
+            .io-section {
+                padding: 15px;
+            }
+            
+            .button-row {
+                flex-direction: column;
+            }
+            
+            .button-row button {
+                width: 100%;
+            }
+        }
+        
+        /* Dark mode styles */
+        [data-theme="dark"] {
+            color-scheme: dark;
+            
+            /* Base styles */
+            color: var(--dark-text);
+            background-color: var(--dark-bg);
+            
+            /* Map background */
+            #map {
+                background-color: #333;
+            }
+            
+            /* UI panels */
+            .ui-panel, .title-box, .tab-container {
+                background: var(--dark-panel-bg);
+                color: var(--dark-text);
+                border-color: var(--dark-border);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--dark-border);
+            }
+            
+            /* Tab styling */
+            .tab-button {
+                background: #333;
+                border-color: var(--dark-border);
+                color: var(--dark-text);
+            }
+            
+            .tab-button.active {
+                background: #444;
+                border-bottom: 2px solid var(--dark-accent);
+            }
+            
+            .tab-button:hover:not(.active) {
+                background: #3a3a3a;
+            }
+            
+            /* Table styling */
+            #feature-table th {
+                background: #333;
+                color: var(--dark-text);
+                border-color: var(--dark-border);
+            }
+            
+            #feature-table td {
+                border-color: var(--dark-border);
+                color: var(--dark-text);
+            }
+            
+            #feature-table tr:nth-child(even) {
+                background-color: #2a2a2a;
+            }
+            
+            #feature-table tr:hover {
+                background-color: #3a3a3a;
+            }
+            
+            #feature-table tr.highlighted {
+                background-color: #2c3e50;
+            }
+            
+            #feature-table tr.selected {
+                background-color: #2c3e50;
+            }
+            
+            #feature-table tr.selected:nth-child(even) {
+                background-color: #34495e;
+            }
+            
+            /* Form elements */
+            input, select, textarea, button {
+                background-color: #333;
+                color: var(--dark-text);
+                border-color: var(--dark-border);
+            }
+            
+            /* Buttons */
+            .control-button, .io-button, .action-button, .warning-button {
+                background-color: #444;
+                color: var(--dark-text);
+                border-color: var(--dark-border);
+            }
+            
+            .control-button:hover, .io-button:hover, .action-button:hover {
+                background-color: #555;
+            }
+            
+            .control-button.primary, .io-button.primary, .action-button.primary {
+                background-color: var(--dark-accent);
+                color: white;
+            }
+            
+            .control-button.primary:hover, .io-button.primary:hover, .action-button.primary:hover {
+                background-color: var(--dark-accent-hover);
+            }
+            
+            /* Layer list */
+            .layer-item {
+                border-bottom: 1px solid var(--dark-border);
+            }
+            
+            .layer-item:hover {
+                background-color: var(--dark-hover);
+            }
+            
+            .layer-label {
+                color: var(--dark-accent);
+            }
+            
+            /* Modals and popups */
+            .feature-detail-header, .layer-editor-header, .warning-content {
+                background-color: #333;
+                border-color: var(--dark-border);
+            }
+            
+            .feature-detail-content, .layer-editor-content {
+                background-color: var(--dark-bg);
+                border: 1px solid var(--dark-border);
+            }
+            
+            .feature-detail-body, .layer-editor-form {
+                background-color: var(--dark-bg);
+            }
+            
+            /* Property values */
+            .property-value {
+                background-color: #333;
+                border-color: var(--dark-border);
+            }
+            
+            /* Notifications */
+            .sampling-notification {
+                background-color: #333;
+                color: var(--dark-text);
+                border-left-color: var(--dark-accent);
+            }
+            
+            /* I/O sections */
+            .io-section {
+                background-color: #2a2a2a;
+            }
+            
+            .export-layers, .export-options {
+                background-color: #333;
+                border-color: var(--dark-border);
+            }
+            
+            /* File drop area */
+            .file-drop-area {
+                background-color: #333;
+                border-color: #555;
+            }
+            
+            /* Context menu */
+            .context-menu {
+                background-color: #333;
+                border-color: var(--dark-border);
+            }
+            
+            .context-menu-item:hover {
+                background-color: #444;
+            }
+            
+            /* Table controls */
+            .table-controls {
+                background: #2a2a2a;
+                border-color: var(--dark-border);
+            }
+            
+            .table-info {
+                color: var(--dark-text-secondary);
+            }
+            
+            /* Loading indicator */
+            .table-loading {
+                background: rgba(40, 40, 40, 0.9);
+                color: var(--dark-text);
+            }
+            
+            /* Layer stats */
+            .layer-stats {
+                background: #333;
+                color: var(--dark-text-secondary);
+            }
+        }
+
+        /* Light mode styles */
+        [data-theme="light"] {
+            /* Reset to light mode variables */
+            --bg: var(--light-bg);
+            --panel-bg: var(--light-panel-bg);
+            --text: var(--light-text);
+            --text-secondary: var(--light-text-secondary);
+            --border: var(--light-border);
+            --hover: var(--light-hover);
+            --accent: var(--light-accent);
+            --accent-hover: var(--light-accent-hover);
+            --danger: var(--light-danger);
+            --success: var(--light-success);
+            --warning: var(--light-warning);
+            
+            /* Base styles */
+            color: var(--light-text);
+            background-color: var(--light-bg);
+        }
+        
+        /* Add these to the dark mode styles section */
+        [data-theme="dark"] {
+            /* Brighten text labels */
+            .form-group label, 
+            .io-group label, 
+            .layer-stats-label,
+            .export-layer-name,
+            .property-name,
+            #feature-table th {
+                color: #e0e0e0; /* Brighter text for labels */
+            }
+            
+            /* Brighten other text elements */
+            .layer-label {
+                color: #4da6ff; /* Brighter blue for layer names */
+            }
+            
+            .export-layer-count,
+            .selection-count,
+            .table-info {
+                color: #bbb; /* Brighter secondary text */
+            }
+            
+            /* Ensure form inputs have good contrast */
+            input, select, textarea {
+                color: #e0e0e0;
+            }
+            
+            /* Improve contrast for feature properties */
+            .feature-property .property-name {
+                color: #e0e0e0;
+            }
+            
+            /* Improve visibility of layer stats */
+            .layer-stats {
+                color: #bbb;
+            }
+            
+            /* Make popup content more readable */
+            .leaflet-popup-content {
+                color: #333; /* Keep popup text dark for readability */
+            }
+        }
     </style>
 </head>
 <body>
-
-    <div id="map"></div>
-
-    <div class="title-box">
-        <h1>Layercake</h1>
-        <p>Simple Serverless GeoJSON Viewer</p>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <label class="switch">
+            <input type="checkbox" id="theme-switch" checked>
+            <span class="slider round">
+                <span class="toggle-icon light">☀️</span>
+                <span class="toggle-icon dark">🌙</span>
+            </span>
+        </label>
+    </div>
+    <!-- Tab Container -->
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="map-view">Map View</button>
+            <button class="tab-button" data-tab="table-view">Table View</button>
+            <button class="tab-button" data-tab="io-view">I/O</button>
+        </div>
     </div>
 
-    <div class="feature-counter" id="feature-counter">
-        <span>No features loaded</span>
-    </div>
+    <!-- Tab Content Container -->
+    <div class="tab-content">
+        <!-- Map View Tab -->
+        <div id="map-view" class="tab-pane active">
+            <div id="map"></div>
 
-    <!-- Add this after the feature-counter div -->
-    <button id="reset-button" class="reset-button" title="Remove all layers">
-        Reset Map
-    </button>
+            <div class="title-box">
+                <div class="title-box-header">
+                    <h1>Layercake</h1>
+                    <button class="title-box-toggle" title="Toggle visibility">▼</button>
+                </div>
+                <p>Simple Serverless GeoJSON Viewer</p>
+            </div>
 
-    <div id="upload-box" class="ui-panel">
-        <h2>Upload GeoJSON</h2>
-        <label for="geojson-upload">Select file(s):</label>
-        <input type="file" id="geojson-upload" accept=".geojson,application/geo+json" multiple>
-        <p>Or drag &amp; drop GeoJSON files onto the map.</p>
-    </div>
+            <div class="feature-counter" id="feature-counter">
+                <span>No features loaded</span>
+            </div>
 
-    <div id="basemap-switcher" class="ui-panel">
-        <h2>Base Map</h2>
-        <select id="basemap-select">
-            <option value="osm" selected>OpenStreetMap</option>
-            <option value="satellite">Satellite</option>
-            <option value="dark">Dark Matter</option>
-            <option value="topo">Topographic</option>
-        </select>
-    </div>
+            <button id="reset-button" class="reset-button" title="Remove all layers">
+                Reset Map
+            </button>
 
-    <div id="layer-list" class="ui-panel">
-        <h2>Loaded Layers</h2>
-        <!-- Layer items will be added here by JavaScript -->
-    </div>
+            <div id="upload-box" class="ui-panel">
+                <h2>Upload GeoJSON</h2>
+                <label for="geojson-upload">Select file(s):</label>
+                <input type="file" id="geojson-upload" accept=".geojson,application/geo+json" multiple>
+                <p>Or drag &amp; drop GeoJSON files onto the map.</p>
+            </div>
 
-    <div id="dropzone">
-        <div>Drop GeoJSON file(s) here</div>
+            <div id="basemap-switcher" class="ui-panel">
+                <h2>Base Map</h2>
+                <select id="basemap-select">
+                    <option value="osm" selected>OpenStreetMap</option>
+                    <option value="satellite">Satellite</option>
+                    <option value="dark">Dark Matter</option>
+                    <option value="topo">Topographic</option>
+                </select>
+            </div>
+
+            <div id="layer-list" class="ui-panel">
+                <h2>Loaded Layers</h2>
+                <!-- Layer items will be added here by JavaScript -->
+            </div>
+
+            <div id="dropzone">
+                <div>Drop GeoJSON file(s) here</div>
+            </div>
+        </div>
+        
+        <!-- Table View Tab -->
+        <div id="table-view" class="tab-pane">
+            <div class="table-controls">
+                <div class="table-controls-row">
+                    <select id="layer-filter">
+                        <option value="all">All Layers</option>
+                        <!-- Layer options will be added dynamically -->
+                    </select>
+                    <div class="search-container">
+                        <input type="text" id="property-search" class="search-input" placeholder="Search properties...">
+                        <button id="search-clear" class="search-clear" title="Clear search">&times;</button>
+                    </div>
+                    <div class="table-info">No features loaded</div>
+                </div>
+                <div class="table-controls-row">
+                    <div class="selection-controls">
+                        <button id="select-all" class="control-button">Select All</button>
+                        <button id="select-none" class="control-button">Select None</button>
+                        <button id="map-selected" class="control-button primary">Map Selected</button>
+                        <button id="copy-to-layer" class="control-button primary">Copy to New Layer</button>
+                    </div>
+                    <button id="reset-filters" class="control-button">Reset Filters</button>
+                    <div class="selection-count" id="selection-count">0 features selected</div>
+                </div>
+            </div>
+            <div class="table-container" id="table-container">
+                <!-- Spacer element to maintain scroll height -->
+                <div class="virtual-spacer" id="virtual-spacer"></div>
+                
+                <!-- Loading indicator -->
+                <div class="table-loading" id="table-loading">
+                    <span class="table-loading-spinner"></span>
+                    <span>Loading features...</span>
+                </div>
+                
+                <table id="feature-table">
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Feature ID</th>
+                            <!-- Property columns will be added dynamically -->
+                        </tr>
+                    </thead>
+                    <tbody id="feature-table-body">
+                        <!-- Only visible rows will be rendered here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- I/O View Tab -->
+        <div id="io-view" class="tab-pane">
+            <div class="io-container">
+                <div class="io-sections-wrapper">
+                    <!-- Import Section (Left) -->
+                    <div class="io-section import-section">
+                        <h2>Import GeoJSON</h2>
+                        
+                        <div class="io-group">
+                            <label for="geojson-input">Paste GeoJSON:</label>
+                            <textarea id="geojson-input" class="geojson-textarea" placeholder="Paste GeoJSON data here..."></textarea>
+                            <div class="button-row">
+                                <button id="import-clipboard" class="io-button">Import from Clipboard</button>
+                                <button id="import-text" class="io-button primary">Import from Text</button>
+                                <button id="clear-text" class="io-button">Clear</button>
+                            </div>
+                        </div>
+                        
+                        <div class="io-group">
+                            <label for="geojson-url">Import from URL:</label>
+                            <div class="url-input-container">
+                                <input type="text" id="geojson-url" placeholder="https://example.com/data.geojson">
+                                <button id="fetch-url" class="io-button primary">Fetch</button>
+                            </div>
+                        </div>
+                        
+                        <div class="io-group">
+                            <label>Import from File:</label>
+                            <div class="file-drop-area" id="io-file-drop">
+                                <div class="file-message">Drop GeoJSON file here or</div>
+                                <input type="file" id="io-file-input" accept=".geojson,application/geo+json" multiple>
+                                <label for="io-file-input" class="file-button">Select File(s)</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Export Section (Right) -->
+                    <div class="io-section export-section">
+                        <h2>Export GeoJSON</h2>
+                        
+                        <div class="io-group">
+                            <label>Layers to Export:</label>
+                            <div id="export-layer-list" class="export-layers">
+                                <!-- Layer checkboxes will be added here dynamically -->
+                                <div class="no-layers-message">No layers available for export</div>
+                            </div>
+                        </div>
+                        
+                        <div class="io-group">
+                            <label>Export Options:</label>
+                            <div class="export-options">
+                                <div class="option-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="export-mode" value="merge" checked>
+                                        Merge into single GeoJSON
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="export-mode" value="separate">
+                                        Export as separate files
+                                    </label>
+                                </div>
+                                <div class="option-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="pretty-print" checked>
+                                        Pretty print (formatted JSON)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="button-row">
+                            <button id="copy-geojson" class="io-button primary">Copy to Clipboard</button>
+                            <button id="download-geojson" class="io-button primary">Download as File(s)</button>
+                            <button id="select-all-layers" class="io-button">Select All</button>
+                            <button id="select-none-layers" class="io-button">Select None</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Leaflet JS -->
@@ -380,6 +2064,13 @@
 
             // --- Configuration ---
             const MAX_LAYERS = 20; // Max number of layers allowed
+            let currentHighlightedFeature = null; // For tracking highlighted features
+
+            // --- Large File Handling Configuration ---
+            const FILE_SIZE_WARNING_THRESHOLD = 10 * 1024 * 1024; // 10MB
+            const FILE_SIZE_DANGER_THRESHOLD = 50 * 1024 * 1024;  // 50MB
+            const FEATURE_COUNT_WARNING_THRESHOLD = 10000; // 10,000 features
+            const FEATURE_COUNT_SAMPLE_SIZE = 5000;        // Sample 5,000 features
 
             // --- Map Initialization ---
             const map = L.map('map', {
@@ -715,8 +2406,19 @@
                        removeLayer(entry.id, true); // Remove with confirmation
                     });
 
+                    // Rename Button
+                    const renameBtn = document.createElement('button');
+                    renameBtn.className = 'rename-btn';
+                    renameBtn.innerHTML = '✏️'; // Pencil emoji
+                    renameBtn.title = 'Rename layer';
+                    renameBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent zoom to layer when clicking rename
+                        renameLayer(entry.id);
+                    });
+
                     controls.appendChild(checkbox);
                     controls.appendChild(colorPicker);
+                    controls.appendChild(renameBtn); // Add the rename button
                     controls.appendChild(deleteBtn);
 
                     // Layer Label (clickable to zoom)
@@ -779,6 +2481,430 @@
                  }
             }
 
+            function renameLayer(layerId) {
+                showLayerEditor(layerId);
+            }
+            
+            // --- Layer Editor Modal ---
+
+            // Show layer editor modal
+            function showLayerEditor(layerId) {
+                const layerEntry = layers.find(l => l.id === layerId);
+                if (!layerEntry) return;
+                
+                // Create modal container
+                const modal = document.createElement('div');
+                modal.className = 'layer-editor-modal';
+                
+                // Create modal content with form fields for name, color, etc.
+                const content = createLayerEditorContent(layerEntry);
+                modal.appendChild(content);
+                
+                // Add to document
+                document.body.appendChild(modal);
+                
+                // Setup close handlers
+                setupModalCloseHandlers(modal);
+                
+                // Focus the name input
+                setTimeout(() => {
+                    const nameInput = modal.querySelector('.layer-name-input');
+                    if (nameInput) nameInput.focus();
+                }, 50);
+            }
+
+            // Create the content for the layer editor modal
+            function createLayerEditorContent(layerEntry) {
+                // Create the content container
+                const content = document.createElement('div');
+                content.className = 'layer-editor-content';
+                
+                // Add header
+                const header = createEditorHeader(layerEntry.name);
+                content.appendChild(header);
+                
+                // Add form fields
+                const form = createEditorForm(layerEntry);
+                content.appendChild(form);
+                
+                // Add action buttons
+                const actions = createEditorActions(layerEntry);
+                content.appendChild(actions);
+                
+                return content;
+            }
+
+            // Create the header for the layer editor
+            function createEditorHeader(layerName) {
+                const header = document.createElement('div');
+                header.className = 'layer-editor-header';
+                
+                const title = document.createElement('h2');
+                title.textContent = `Edit Layer: ${layerName}`;
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'layer-editor-close';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.title = 'Close';
+                closeBtn.addEventListener('click', () => {
+                    const modal = document.querySelector('.layer-editor-modal');
+                    if (modal) modal.remove();
+                });
+                
+                header.appendChild(title);
+                header.appendChild(closeBtn);
+                
+                return header;
+            }
+
+            // Create the form for the layer editor
+            function createEditorForm(layerEntry) {
+                const form = document.createElement('div');
+                form.className = 'layer-editor-form';
+                
+                // Name field
+                const nameGroup = document.createElement('div');
+                nameGroup.className = 'form-group';
+                
+                const nameLabel = document.createElement('label');
+                nameLabel.textContent = 'Layer Name:';
+                
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'layer-name-input';
+                nameInput.value = layerEntry.name;
+                nameInput.placeholder = 'Enter layer name';
+                nameInput.addEventListener('input', () => {
+                    // Update the layer name in real-time
+                    layerEntry.name = nameInput.value.trim() || 'Unnamed Layer';
+                    updateLayerList();
+                    updateLayerFilterOptions();
+                    
+                    // Update the header title
+                    const headerTitle = document.querySelector('.layer-editor-header h2');
+                    if (headerTitle) {
+                        headerTitle.textContent = `Edit Layer: ${layerEntry.name}`;
+                    }
+                });
+                
+                nameGroup.appendChild(nameLabel);
+                nameGroup.appendChild(nameInput);
+                form.appendChild(nameGroup);
+                
+                // Color picker
+                const colorGroup = document.createElement('div');
+                colorGroup.className = 'form-group';
+                
+                const colorLabel = document.createElement('label');
+                colorLabel.textContent = 'Layer Color:';
+                
+                const colorContainer = document.createElement('div');
+                colorContainer.className = 'color-picker-container';
+                
+                const colorPreview = document.createElement('div');
+                colorPreview.className = 'color-preview';
+                colorPreview.style.backgroundColor = layerEntry.color;
+                
+                const colorPicker = document.createElement('input');
+                colorPicker.type = 'color';
+                colorPicker.value = layerEntry.color;
+                colorPicker.addEventListener('input', () => {
+                    // Update the color in our state
+                    layerEntry.color = colorPicker.value;
+                    colorPreview.style.backgroundColor = colorPicker.value;
+                    
+                    // Apply the new color to the layer
+                    updateLayerStyle(layerEntry);
+                    updateLayerList();
+                });
+                
+                colorContainer.appendChild(colorPreview);
+                colorContainer.appendChild(colorPicker);
+                
+                colorGroup.appendChild(colorLabel);
+                colorGroup.appendChild(colorContainer);
+                form.appendChild(colorGroup);
+                
+                // Point size slider (only for layers with points)
+                if (hasPointFeatures(layerEntry.layer)) {
+                    const sizeGroup = document.createElement('div');
+                    sizeGroup.className = 'form-group';
+                    
+                    const sizeLabel = document.createElement('label');
+                    sizeLabel.textContent = 'Point Size:';
+                    
+                    const sliderContainer = document.createElement('div');
+                    sliderContainer.className = 'slider-container';
+                    
+                    const sizeSlider = document.createElement('input');
+                    sizeSlider.type = 'range';
+                    sizeSlider.min = '2';
+                    sizeSlider.max = '15';
+                    sizeSlider.value = layerEntry.pointSize || '6'; // Default to 6 if not set
+                    
+                    const sizeValue = document.createElement('span');
+                    sizeValue.className = 'slider-value';
+                    sizeValue.textContent = `${sizeSlider.value}px`;
+                    
+                    sizeSlider.addEventListener('input', () => {
+                        // Update the point size in our state
+                        layerEntry.pointSize = parseInt(sizeSlider.value);
+                        sizeValue.textContent = `${sizeSlider.value}px`;
+                        
+                        // Apply the new size to the layer
+                        updateLayerStyle(layerEntry);
+                    });
+                    
+                    sliderContainer.appendChild(sizeSlider);
+                    sliderContainer.appendChild(sizeValue);
+                    
+                    sizeGroup.appendChild(sizeLabel);
+                    sizeGroup.appendChild(sliderContainer);
+                    form.appendChild(sizeGroup);
+                }
+                
+                // Line width slider (only for layers with lines)
+                if (hasLineFeatures(layerEntry.layer)) {
+                    const widthGroup = document.createElement('div');
+                    widthGroup.className = 'form-group';
+                    
+                    const widthLabel = document.createElement('label');
+                    widthLabel.textContent = 'Line Width:';
+                    
+                    const sliderContainer = document.createElement('div');
+                    sliderContainer.className = 'slider-container';
+                    
+                    const widthSlider = document.createElement('input');
+                    widthSlider.type = 'range';
+                    widthSlider.min = '1';
+                    widthSlider.max = '10';
+                    widthSlider.value = layerEntry.lineWidth || '2'; // Default to 2 if not set
+                    
+                    const widthValue = document.createElement('span');
+                    widthValue.className = 'slider-value';
+                    widthValue.textContent = `${widthSlider.value}px`;
+                    
+                    widthSlider.addEventListener('input', () => {
+                        // Update the line width in our state
+                        layerEntry.lineWidth = parseInt(widthSlider.value);
+                        widthValue.textContent = `${widthSlider.value}px`;
+                        
+                        // Apply the new width to the layer
+                        updateLayerStyle(layerEntry);
+                    });
+                    
+                    sliderContainer.appendChild(widthSlider);
+                    sliderContainer.appendChild(widthValue);
+                    
+                    widthGroup.appendChild(widthLabel);
+                    widthGroup.appendChild(sliderContainer);
+                    form.appendChild(widthGroup);
+                }
+                
+                // Layer statistics
+                const statsGroup = document.createElement('div');
+                statsGroup.className = 'form-group';
+                
+                const statsLabel = document.createElement('label');
+                statsLabel.textContent = 'Layer Statistics:';
+                
+                const statsContainer = document.createElement('div');
+                statsContainer.className = 'layer-stats';
+                
+                // Count features
+                let featureCount = 0;
+                layerEntry.layer.eachLayer(() => { featureCount++; });
+                
+                const countItem = document.createElement('div');
+                countItem.className = 'layer-stats-item';
+                
+                const countLabel = document.createElement('span');
+                countLabel.className = 'layer-stats-label';
+                countLabel.textContent = 'Features:';
+                
+                const countValue = document.createElement('span');
+                countValue.textContent = `${featureCount} feature${featureCount !== 1 ? 's' : ''}`;
+                
+                countItem.appendChild(countLabel);
+                countItem.appendChild(countValue);
+                statsContainer.appendChild(countItem);
+                
+                // Get bounds if available
+                try {
+                    const bounds = layerEntry.layer.getBounds();
+                    if (bounds && bounds.isValid()) {
+                        const sw = bounds.getSouthWest();
+                        const ne = bounds.getNorthEast();
+                        
+                        const boundsItem = document.createElement('div');
+                        boundsItem.className = 'layer-stats-item';
+                        
+                        const boundsLabel = document.createElement('span');
+                        boundsLabel.className = 'layer-stats-label';
+                        boundsLabel.textContent = 'Bounds:';
+                        
+                        const boundsValue = document.createElement('span');
+                        boundsValue.textContent = `${sw.lat.toFixed(4)}°, ${sw.lng.toFixed(4)}° to ${ne.lat.toFixed(4)}°, ${ne.lng.toFixed(4)}°`;
+                        
+                        boundsItem.appendChild(boundsLabel);
+                        boundsItem.appendChild(boundsValue);
+                        statsContainer.appendChild(boundsItem);
+                    }
+                } catch (error) {
+                    console.log('Could not determine bounds for layer');
+                }
+                
+                statsGroup.appendChild(statsLabel);
+                statsGroup.appendChild(statsContainer);
+                form.appendChild(statsGroup);
+                
+                return form;
+            }
+
+            // Create the action buttons for the layer editor
+            function createEditorActions(layerEntry) {
+                const actions = document.createElement('div');
+                actions.className = 'layer-editor-actions';
+                
+                // Export button
+                const exportBtn = document.createElement('button');
+                exportBtn.className = 'action-button primary';
+                exportBtn.textContent = 'Export Layer';
+                exportBtn.addEventListener('click', () => {
+                    exportSingleLayer(layerEntry.id);
+                });
+                
+                // Zoom to button
+                const zoomBtn = document.createElement('button');
+                zoomBtn.className = 'action-button primary';
+                zoomBtn.textContent = 'Zoom to Layer';
+                zoomBtn.addEventListener('click', () => {
+                    zoomToLayer(layerEntry.id);
+                    
+                    // Close the modal
+                    const modal = document.querySelector('.layer-editor-modal');
+                    if (modal) modal.remove();
+                });
+                
+                // Duplicate button
+                const duplicateBtn = document.createElement('button');
+                duplicateBtn.className = 'action-button';
+                duplicateBtn.textContent = 'Duplicate Layer';
+                duplicateBtn.addEventListener('click', () => {
+                    duplicateLayer(layerEntry.id);
+                    
+                    // Close the modal
+                    const modal = document.querySelector('.layer-editor-modal');
+                    if (modal) modal.remove();
+                });
+                
+                // Delete button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'action-button danger';
+                deleteBtn.textContent = 'Delete Layer';
+                deleteBtn.addEventListener('click', () => {
+                    // Close the modal first
+                    const modal = document.querySelector('.layer-editor-modal');
+                    if (modal) modal.remove();
+                    
+                    // Then remove the layer with confirmation
+                    removeLayer(layerEntry.id, true);
+                });
+                
+                actions.appendChild(exportBtn);
+                actions.appendChild(zoomBtn);
+                actions.appendChild(duplicateBtn);
+                actions.appendChild(deleteBtn);
+                
+                return actions;
+            }
+
+            // Setup close handlers for the modal
+            function setupModalCloseHandlers(modal) {
+                // Close when clicking outside the content
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+                
+                // Close with Escape key
+                const escHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        modal.remove();
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                };
+                document.addEventListener('keydown', escHandler);
+            }
+
+            // Export a single layer
+            function exportSingleLayer(layerId) {
+                const layerEntry = layers.find(l => l.id === layerId);
+                if (!layerEntry) return;
+                
+                // Get GeoJSON for the layer
+                const layerGeoJSON = layerEntry.layer.toGeoJSON();
+                
+                // Format the JSON with pretty print
+                const jsonString = JSON.stringify(layerGeoJSON, null, 2);
+                
+                // Create a safe filename
+                const filename = `${layerEntry.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.geojson`;
+                
+                // Try to copy to clipboard first
+                navigator.clipboard.writeText(jsonString)
+                    .then(() => {
+                        showNotification('Copied to Clipboard', 'Layer GeoJSON has been copied to your clipboard.', 'success');
+                        
+                        // Also download the file
+                        downloadGeoJSONFile(jsonString, filename);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy to clipboard:', err);
+                        
+                        // Just download the file if clipboard fails
+                        downloadGeoJSONFile(jsonString, filename);
+                        showNotification('Export Complete', 'Layer has been exported to a file.', 'success');
+                    });
+            }
+
+            // Download a GeoJSON file
+            function downloadGeoJSONFile(jsonString, filename) {
+                const blob = new Blob([jsonString], { type: 'application/geo+json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+
+            // Duplicate a layer
+            function duplicateLayer(layerId) {
+                const layerEntry = layers.find(l => l.id === layerId);
+                if (!layerEntry) return;
+                
+                // Get GeoJSON representation of the layer
+                const layerGeoJSON = layerEntry.layer.toGeoJSON();
+                
+                // Create a new name with "(copy)" suffix
+                const newName = `${layerEntry.name} (copy)`;
+                
+                // Render as a new layer
+                renderGeoJSON(layerGeoJSON, newName);
+                
+                // Show notification
+                showNotification('Layer Duplicated', `Created a copy of "${layerEntry.name}".`, 'success');
+            }
+
             function zoomToLayer(layerId) {
                 const entry = layers.find(l => l.id === layerId);
                 if (entry && entry.layer) {
@@ -827,41 +2953,1514 @@
                 }
             }
 
+            // --- Large File Handling ---
+            
+            // Modified handleFiles function with size checks
             function handleFiles(fileList) {
-                 if (!fileList || fileList.length === 0) return;
+                if (!fileList || fileList.length === 0) return;
 
-                 // Convert FileList to Array and process each file
-                 Array.from(fileList).forEach(file => {
-                     // Basic check for GeoJSON extension or MIME type
-                     if (!file.name.toLowerCase().endsWith('.geojson') && file.type !== 'application/geo+json') {
+                // Convert FileList to Array and process each file
+                Array.from(fileList).forEach(file => {
+                    // Basic check for GeoJSON extension or MIME type
+                    if (!file.name.toLowerCase().endsWith('.geojson') && file.type !== 'application/geo+json') {
                         console.warn(`Skipping file "${file.name}" as it does not appear to be a GeoJSON file.`);
-                        // Optionally alert the user: alert(`Skipping file "${file.name}": Incorrect file type.`);
                         return; // Skip this file
                     }
 
-                    const reader = new FileReader();
-
-                    reader.onload = (e) => {
-                        try {
-                            const geojsonData = JSON.parse(e.target.result);
-                            // Basic validation: Check for 'type' and 'features' (for FeatureCollection) or 'geometry'
-                            if (!geojsonData || !geojsonData.type || !(geojsonData.features || geojsonData.geometry)) {
-                                throw new Error("Invalid GeoJSON structure.");
-                            }
-                             renderGeoJSON(geojsonData, file.name);
-                        } catch (error) {
-                            console.error(`Error parsing JSON from file "${file.name}":`, error);
-                            alert(`Failed to parse GeoJSON file "${file.name}". Ensure it's valid JSON.\nError: ${error.message}`);
+                    // Check file size
+                    if (file.size > FILE_SIZE_WARNING_THRESHOLD) {
+                        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                        
+                        // Different handling based on size
+                        if (file.size > FILE_SIZE_DANGER_THRESHOLD) {
+                            // Very large file - show stronger warning
+                            showFileSizeWarning(file, fileSizeMB, true);
+                        } else {
+                            // Moderately large file - show standard warning
+                            showFileSizeWarning(file, fileSizeMB, false);
                         }
+                        return; // Exit early - the warning dialog will handle the file if user proceeds
+                    }
+
+                    // Normal file processing for smaller files
+                    processGeoJSONFile(file);
+                });
+            }
+
+            // File size warning dialog
+            function showFileSizeWarning(file, fileSizeMB, isDangerous) {
+                // Create modal container
+                const modal = document.createElement('div');
+                modal.className = 'warning-modal';
+                
+                // Create modal content
+                const content = document.createElement('div');
+                content.className = 'warning-content';
+                
+                // Warning icon
+                const icon = document.createElement('div');
+                icon.className = 'warning-icon';
+                icon.innerHTML = '⚠️';
+                
+                // Warning title
+                const title = document.createElement('h3');
+                title.textContent = isDangerous ? 
+                    'Very Large File Detected' : 
+                    'Large File Detected';
+                
+                // Warning message
+                const message = document.createElement('p');
+                message.innerHTML = isDangerous ?
+                    `The file <strong>${file.name}</strong> is extremely large (${fileSizeMB} MB) and may cause your browser to freeze or crash. We recommend splitting this file into smaller parts before loading.` :
+                    `The file <strong>${file.name}</strong> is quite large (${fileSizeMB} MB) and may take some time to process. This could temporarily slow down your browser.`;
+                
+                // Create buttons
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'warning-buttons';
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'Cancel';
+                cancelButton.className = 'warning-button cancel';
+                cancelButton.addEventListener('click', () => {
+                    modal.remove();
+                });
+                
+                const proceedButton = document.createElement('button');
+                proceedButton.textContent = isDangerous ? 'Proceed Anyway' : 'Proceed';
+                proceedButton.className = `warning-button proceed ${isDangerous ? 'danger' : ''}`;
+                proceedButton.addEventListener('click', () => {
+                    modal.remove();
+                    processGeoJSONFile(file);
+                });
+                
+                // Add sample option for very large files
+                if (isDangerous) {
+                    const sampleButton = document.createElement('button');
+                    sampleButton.textContent = 'Load Sample Only';
+                    sampleButton.className = 'warning-button sample';
+                    sampleButton.addEventListener('click', () => {
+                        modal.remove();
+                        processGeoJSONFileWithSampling(file);
+                    });
+                    buttonContainer.appendChild(sampleButton);
+                }
+                
+                buttonContainer.appendChild(cancelButton);
+                buttonContainer.appendChild(proceedButton);
+                
+                // Assemble modal
+                content.appendChild(icon);
+                content.appendChild(title);
+                content.appendChild(message);
+                content.appendChild(buttonContainer);
+                modal.appendChild(content);
+                
+                // Add to document
+                document.body.appendChild(modal);
+            }
+
+            // Process GeoJSON file with feature count check
+            function processGeoJSONFile(file) {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    try {
+                        const geojsonData = JSON.parse(e.target.result);
+                        
+                        // Basic validation
+                        if (!geojsonData || !geojsonData.type || !(geojsonData.features || geojsonData.geometry)) {
+                            throw new Error("Invalid GeoJSON structure.");
+                        }
+                        
+                        // Check feature count for FeatureCollections
+                        if (geojsonData.type === 'FeatureCollection' && Array.isArray(geojsonData.features)) {
+                            const featureCount = geojsonData.features.length;
+                            
+                            if (featureCount > FEATURE_COUNT_WARNING_THRESHOLD) {
+                                // Show warning about large feature count
+                                showFeatureCountWarning(file, featureCount, geojsonData);
+                                return; // Exit early - the warning dialog will handle rendering
+                            }
+                        }
+                        
+                        // Normal rendering for acceptable feature counts
+                        renderGeoJSON(geojsonData, file.name);
+                    } catch (error) {
+                        console.error(`Error parsing JSON from file "${file.name}":`, error);
+                        alert(`Failed to parse GeoJSON file "${file.name}". Ensure it's valid JSON.\nError: ${error.message}`);
+                    }
+                };
+
+                reader.onerror = (e) => {
+                    console.error(`Error reading file "${file.name}":`, e);
+                    alert(`Error reading file "${file.name}".`);
+                };
+
+                reader.readAsText(file);
+            }
+
+            // Feature count warning dialog
+            function showFeatureCountWarning(file, featureCount, geojsonData) {
+                // Create modal container
+                const modal = document.createElement('div');
+                modal.className = 'warning-modal';
+                
+                // Create modal content
+                const content = document.createElement('div');
+                content.className = 'warning-content';
+                
+                // Warning icon
+                const icon = document.createElement('div');
+                icon.className = 'warning-icon';
+                icon.innerHTML = '⚠️';
+                
+                // Warning title
+                const title = document.createElement('h3');
+                title.textContent = 'Large Number of Features Detected';
+                
+                // Warning message
+                const message = document.createElement('p');
+                message.innerHTML = `The file <strong>${file.name}</strong> contains ${featureCount.toLocaleString()} features, which may cause performance issues. Loading all features could slow down your browser.`;
+                
+                // Create buttons
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'warning-buttons';
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'Cancel';
+                cancelButton.className = 'warning-button cancel';
+                cancelButton.addEventListener('click', () => {
+                    modal.remove();
+                });
+                
+                const proceedButton = document.createElement('button');
+                proceedButton.textContent = 'Load All Features';
+                proceedButton.className = 'warning-button proceed';
+                proceedButton.addEventListener('click', () => {
+                    modal.remove();
+                    renderGeoJSON(geojsonData, file.name);
+                });
+                
+                const sampleButton = document.createElement('button');
+                sampleButton.textContent = `Load Sample (${FEATURE_COUNT_SAMPLE_SIZE})`;
+                sampleButton.className = 'warning-button sample';
+                sampleButton.addEventListener('click', () => {
+                    modal.remove();
+                    
+                    // Create a sampled version of the GeoJSON
+                    const sampledGeoJSON = {
+                        type: 'FeatureCollection',
+                        features: sampleFeatures(geojsonData.features, FEATURE_COUNT_SAMPLE_SIZE),
+                        // Preserve any other properties from the original
+                        ...Object.fromEntries(
+                            Object.entries(geojsonData).filter(([key]) => 
+                                !['type', 'features'].includes(key)
+                            )
+                        )
                     };
+                    
+                    // Modify the filename to indicate it's a sample
+                    const sampledFilename = `${file.name} (SAMPLE ${FEATURE_COUNT_SAMPLE_SIZE}/${featureCount})`;
+                    
+                    // Render the sampled GeoJSON
+                    renderGeoJSON(sampledGeoJSON, sampledFilename);
+                    
+                    // Show info message about sampling
+                    showSamplingNotification(featureCount, FEATURE_COUNT_SAMPLE_SIZE);
+                });
+                
+                buttonContainer.appendChild(cancelButton);
+                buttonContainer.appendChild(sampleButton);
+                buttonContainer.appendChild(proceedButton);
+                
+                // Assemble modal
+                content.appendChild(icon);
+                content.appendChild(title);
+                content.appendChild(message);
+                content.appendChild(buttonContainer);
+                modal.appendChild(content);
+                
+                // Add to document
+                document.body.appendChild(modal);
+            }
 
-                     reader.onerror = (e) => {
-                         console.error(`Error reading file "${file.name}":`, e);
-                         alert(`Error reading file "${file.name}".`);
-                     };
+            // Process GeoJSON file with sampling
+            function processGeoJSONFileWithSampling(file) {
+                const reader = new FileReader();
 
-                    reader.readAsText(file); // Read the file as text
-                 });
+                reader.onload = (e) => {
+                    try {
+                        const geojsonData = JSON.parse(e.target.result);
+                        
+                        // Basic validation
+                        if (!geojsonData || !geojsonData.type) {
+                            throw new Error("Invalid GeoJSON structure.");
+                        }
+                        
+                        // Check if it's a FeatureCollection
+                        if (geojsonData.type === 'FeatureCollection' && Array.isArray(geojsonData.features)) {
+                            const featureCount = geojsonData.features.length;
+                            
+                            // Create a sampled version of the GeoJSON
+                            const sampledGeoJSON = {
+                                type: 'FeatureCollection',
+                                features: sampleFeatures(geojsonData.features, FEATURE_COUNT_SAMPLE_SIZE),
+                                // Preserve any other properties from the original
+                                ...Object.fromEntries(
+                                    Object.entries(geojsonData).filter(([key]) => 
+                                        !['type', 'features'].includes(key)
+                                    )
+                                )
+                            };
+                            
+                            // Modify the filename to indicate it's a sample
+                            const sampledFilename = `${file.name} (SAMPLE ${FEATURE_COUNT_SAMPLE_SIZE}/${featureCount})`;
+                            
+                            // Render the sampled GeoJSON
+                            renderGeoJSON(sampledGeoJSON, sampledFilename);
+                            
+                            // Show info message about sampling
+                            showSamplingNotification(featureCount, FEATURE_COUNT_SAMPLE_SIZE);
+                        } else {
+                            // For single features or other GeoJSON types, render normally
+                            renderGeoJSON(geojsonData, file.name);
+                        }
+                    } catch (error) {
+                        console.error(`Error processing file "${file.name}":`, error);
+                        alert(`Failed to process GeoJSON file "${file.name}".\nError: ${error.message}`);
+                    }
+                };
+
+                reader.onerror = (e) => {
+                    console.error(`Error reading file "${file.name}":`, e);
+                    alert(`Error reading file "${file.name}".`);
+                };
+
+                reader.readAsText(file);
+            }
+
+            // Sample features from a large feature array
+            function sampleFeatures(features, sampleSize) {
+                // If features array is smaller than sample size, return all features
+                if (features.length <= sampleSize) {
+                    return [...features];
+                }
+                
+                // For very large arrays, use reservoir sampling algorithm
+                if (features.length > 100000) {
+                    return reservoirSampling(features, sampleSize);
+                }
+                
+                // For moderately large arrays, shuffle and slice
+                // (Fisher-Yates shuffle algorithm)
+                const shuffled = [...features];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                
+                return shuffled.slice(0, sampleSize);
+            }
+
+            // Reservoir sampling algorithm for very large arrays
+            // This is more memory efficient for extremely large datasets
+            function reservoirSampling(features, sampleSize) {
+                const result = features.slice(0, sampleSize);
+                
+                for (let i = sampleSize; i < features.length; i++) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    if (j < sampleSize) {
+                        result[j] = features[i];
+                    }
+                }
+                
+                return result;
+            }
+
+            // Show notification about sampling
+            function showSamplingNotification(totalCount, sampleSize) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = 'sampling-notification';
+                notification.innerHTML = `
+                    <div class="notification-icon">ℹ️</div>
+                    <div class="notification-content">
+                        <h4>Sample Loaded</h4>
+                        <p>Loaded ${sampleSize.toLocaleString()} features out of ${totalCount.toLocaleString()} total features.</p>
+                    </div>
+                    <button class="notification-close">&times;</button>
+                `;
+                
+                // Add close button functionality
+                const closeButton = notification.querySelector('.notification-close');
+                closeButton.addEventListener('click', () => {
+                    notification.classList.add('notification-hiding');
+                    setTimeout(() => notification.remove(), 300); // Remove after animation
+                });
+                
+                // Auto-hide after 8 seconds
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        notification.classList.add('notification-hiding');
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, 8000);
+                
+                // Add to document
+                document.body.appendChild(notification);
+                
+                // Trigger entrance animation
+                setTimeout(() => notification.classList.add('notification-visible'), 10);
+            }
+            
+            // Show a notification with custom type (info, success, warning)
+            function showNotification(title, message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `sampling-notification ${type}`;
+                
+                // Set icon based on type
+                let icon = 'ℹ️'; // Default info icon
+                if (type === 'success') icon = '✅';
+                if (type === 'warning') icon = '⚠️';
+                
+                notification.innerHTML = `
+                    <div class="notification-icon">${icon}</div>
+                    <div class="notification-content">
+                        <h4>${title}</h4>
+                        <p>${message}</p>
+                    </div>
+                    <button class="notification-close">&times;</button>
+                `;
+                
+                // Add close button functionality
+                const closeButton = notification.querySelector('.notification-close');
+                closeButton.addEventListener('click', () => {
+                    notification.classList.add('notification-hiding');
+                    setTimeout(() => notification.remove(), 300);
+                });
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        notification.classList.add('notification-hiding');
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, 5000);
+                
+                // Add to document
+                document.body.appendChild(notification);
+                
+                // Trigger entrance animation
+                setTimeout(() => notification.classList.add('notification-visible'), 10);
+            }
+
+            // --- Context Menu and Feature Detail View ---
+            let contextMenu = null;
+            let activeDetailModal = null;
+            let detailMap = null;
+
+            // Create and show context menu
+            function showContextMenu(e, row) {
+                e.preventDefault();
+                
+                // Remove any existing context menu
+                hideContextMenu();
+                
+                // Create new context menu
+                contextMenu = document.createElement('div');
+                contextMenu.className = 'context-menu';
+                
+                // Add menu items
+                const expandItem = document.createElement('div');
+                expandItem.className = 'context-menu-item';
+                expandItem.innerHTML = '<i>🔍</i> Expand feature...';
+                expandItem.addEventListener('click', () => {
+                    hideContextMenu();
+                    showFeatureDetail(row);
+                });
+                
+                contextMenu.appendChild(expandItem);
+                
+                // Position the menu at the mouse position
+                contextMenu.style.left = `${e.pageX}px`;
+                contextMenu.style.top = `${e.pageY}px`;
+                
+                // Add to document
+                document.body.appendChild(contextMenu);
+                
+                // Add click listener to hide menu when clicking elsewhere
+                setTimeout(() => {
+                    window.addEventListener('click', hideContextMenu);
+                }, 0);
+            }
+
+            // Hide context menu
+            function hideContextMenu() {
+                if (contextMenu) {
+                    contextMenu.remove();
+                    contextMenu = null;
+                    window.removeEventListener('click', hideContextMenu);
+                }
+            }
+
+            // Show feature detail modal
+            function showFeatureDetail(row) {
+                const layerId = row.dataset.layerId;
+                const featureIndex = parseInt(row.dataset.featureIndex);
+                
+                const layerEntry = layers.find(l => l.id === layerId);
+                if (!layerEntry) return;
+                
+                let index = 0;
+                let targetFeature = null;
+                
+                layerEntry.layer.eachLayer(featureLayer => {
+                    if (index === featureIndex) {
+                        targetFeature = featureLayer;
+                    }
+                    index++;
+                });
+                
+                if (!targetFeature) return;
+                
+                // Create modal container
+                const modal = document.createElement('div');
+                modal.className = 'feature-detail-modal';
+                
+                // Create modal content
+                const content = document.createElement('div');
+                content.className = 'feature-detail-content';
+                
+                // Create header
+                const header = document.createElement('div');
+                header.className = 'feature-detail-header';
+                
+                const title = document.createElement('h2');
+                const featureId = targetFeature.feature.properties?.id || `Feature ${featureIndex + 1}`;
+                title.textContent = `${layerEntry.name}: ${featureId}`;
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'feature-detail-close';
+                closeBtn.innerHTML = '&times;';
+                closeBtn.title = 'Close';
+                closeBtn.addEventListener('click', () => {
+                    closeFeatureDetail(modal);
+                });
+                
+                header.appendChild(title);
+                header.appendChild(closeBtn);
+                
+                // Create body with map and info sections
+                const body = document.createElement('div');
+                body.className = 'feature-detail-body';
+                
+                // Map section
+                const mapContainer = document.createElement('div');
+                mapContainer.className = 'feature-detail-map';
+                mapContainer.id = 'detail-map-' + Date.now();
+                
+                // Info section
+                const infoContainer = document.createElement('div');
+                infoContainer.className = 'feature-detail-info';
+                
+                // Add properties to info section
+                const properties = targetFeature.feature.properties || {};
+                
+                if (Object.keys(properties).length === 0) {
+                    const noProps = document.createElement('p');
+                    noProps.textContent = 'No properties found for this feature.';
+                    infoContainer.appendChild(noProps);
+                } else {
+                    // Sort properties alphabetically
+                    const sortedKeys = Object.keys(properties).sort();
+                    
+                    for (const key of sortedKeys) {
+                        const value = properties[key];
+                        const propDiv = document.createElement('div');
+                        propDiv.className = 'feature-property';
+                        
+                        const nameDiv = document.createElement('div');
+                        nameDiv.className = 'property-name';
+                        nameDiv.textContent = key;
+                        
+                        const valueDiv = document.createElement('div');
+                        valueDiv.className = 'property-value';
+                        
+                        if (value === null) {
+                            valueDiv.innerHTML = '<em>null</em>';
+                            valueDiv.style.color = '#999';
+                        } else if (typeof value === 'object') {
+                            valueDiv.classList.add('object-value');
+                            try {
+                                valueDiv.textContent = JSON.stringify(value, null, 2);
+                            } catch (e) {
+                                valueDiv.textContent = '[Complex Object]';
+                            }
+                        } else {
+                            valueDiv.textContent = value;
+                        }
+                        
+                        propDiv.appendChild(nameDiv);
+                        propDiv.appendChild(valueDiv);
+                        infoContainer.appendChild(propDiv);
+                    }
+                }
+                
+                body.appendChild(mapContainer);
+                body.appendChild(infoContainer);
+                
+                // Assemble modal
+                content.appendChild(header);
+                content.appendChild(body);
+                modal.appendChild(content);
+                
+                // Add to document
+                document.body.appendChild(modal);
+                activeDetailModal = modal;
+                
+                // Initialize minimap after DOM is updated
+                setTimeout(() => {
+                    initDetailMap(mapContainer.id, targetFeature, layerEntry.color);
+                }, 50);
+                
+                // Close modal when clicking outside content
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeFeatureDetail(modal);
+                    }
+                });
+                
+                // Close modal with Escape key
+                const escHandler = (e) => {
+                    if (e.key === 'Escape') {
+                        closeFeatureDetail(modal);
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                };
+                document.addEventListener('keydown', escHandler);
+            }
+
+            // Initialize the detail map
+            function initDetailMap(containerId, feature, color) {
+                // Create a new map in the container
+                detailMap = L.map(containerId, {
+                    zoomControl: true,
+                    attributionControl: false
+                });
+                
+                // Add the same base layer as the main map
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(detailMap);
+                
+                // Create a copy of the feature with enhanced styling
+                let detailFeature;
+                
+                if (feature instanceof L.CircleMarker) {
+                    // For point features
+                    const latlng = feature.getLatLng();
+                    detailFeature = L.circleMarker(latlng, {
+                        radius: 8,
+                        fillColor: color,
+                        color: '#333',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(detailMap);
+                    
+                    // Add a pulsing circle effect for better visibility
+                    const pulseCircle = L.circleMarker(latlng, {
+                        radius: 15,
+                        fillColor: color,
+                        color: 'transparent',
+                        fillOpacity: 0.3
+                    }).addTo(detailMap);
+                    
+                    // Simple pulse animation
+                    let growing = true;
+                    const pulseInterval = setInterval(() => {
+                        if (!detailMap) {
+                            clearInterval(pulseInterval);
+                            return;
+                        }
+                        
+                        const currentRadius = pulseCircle.getRadius();
+                        if (growing) {
+                            pulseCircle.setRadius(currentRadius + 0.5);
+                            if (currentRadius > 20) growing = false;
+                        } else {
+                            pulseCircle.setRadius(currentRadius - 0.5);
+                            if (currentRadius < 10) growing = true;
+                        }
+                    }, 50);
+                } else {
+                    // For lines and polygons
+                    detailFeature = L.geoJSON(feature.toGeoJSON(), {
+                        style: {
+                            color: color,
+                            weight: 3,
+                            opacity: 1,
+                            fillColor: color,
+                            fillOpacity: 0.4
+                        }
+                    }).addTo(detailMap);
+                }
+                
+                // Fit the map to the feature bounds
+                try {
+                    const bounds = feature.getBounds ? 
+                        feature.getBounds() : 
+                        L.latLngBounds(feature.getLatLng(), feature.getLatLng()).extend(
+                            L.latLng(feature.getLatLng().lat + 0.01, feature.getLatLng().lng + 0.01)
+                        );
+                    
+                    detailMap.fitBounds(bounds, {
+                        padding: [30, 30],
+                        maxZoom: 18
+                    });
+                } catch (error) {
+                    console.error("Error setting bounds for detail map:", error);
+                    detailMap.setView([0, 0], 1);
+                }
+            }
+
+            // Close feature detail modal
+            function closeFeatureDetail(modal) {
+                if (modal) {
+                    modal.remove();
+                    activeDetailModal = null;
+                }
+                
+                // Clean up the map to prevent memory leaks
+                if (detailMap) {
+                    detailMap.remove();
+                    detailMap = null;
+                }
+            }
+
+            // Toggle selection of a single feature
+            function toggleFeatureSelection(featureId, selected) {
+                if (selected) {
+                    virtualTable.selectedFeatures.add(featureId);
+                } else {
+                    virtualTable.selectedFeatures.delete(featureId);
+                }
+                
+                // Only update the counter, not the entire table
+                updateSelectionCount();
+            }
+
+            // Select all currently filtered features
+            function selectAllFeatures() {
+                virtualTable.allFeatures.forEach(feature => {
+                    const featureId = `${feature.layerId}-${feature.featureIndex}`;
+                    virtualTable.selectedFeatures.add(featureId);
+                });
+                renderVisibleRows();
+                updateSelectionCount();
+            }
+
+            // Clear all selections
+            function clearAllSelections() {
+                virtualTable.selectedFeatures.clear();
+                renderVisibleRows();
+                updateSelectionCount();
+            }
+
+            // Update the selection counter
+            function updateSelectionCount() {
+                const countElement = document.getElementById('selection-count');
+                const count = virtualTable.selectedFeatures.size;
+                const total = virtualTable.totalRows;
+                countElement.textContent = `${count} of ${total.toLocaleString()} features selected`;
+            }
+
+            // Highlight selected features on the map
+            function mapSelectedFeatures() {
+                // If no features selected, show message and return
+                if (virtualTable.selectedFeatures.size === 0) {
+                    alert('No features selected to map');
+                    return;
+                }
+                
+                // First switch to map view
+                document.querySelector('.tab-button[data-tab="map-view"]').click();
+                
+                // Create a collection to track highlighted features (without duplicating them)
+                const highlightedFeatures = [];
+                
+                // Store original styles to restore later
+                const originalStyles = new Map();
+                
+                // Highlight each selected feature by modifying its style
+                virtualTable.selectedFeatures.forEach(featureId => {
+                    const [layerId, featureIndex] = featureId.split('-');
+                    const layerEntry = layers.find(l => l.id === layerId);
+                    if (!layerEntry) return;
+                    
+                    let index = 0;
+                    layerEntry.layer.eachLayer(featureLayer => {
+                        if (index === parseInt(featureIndex)) {
+                            // Store original style
+                            if (featureLayer instanceof L.CircleMarker) {
+                                originalStyles.set(featureLayer, {
+                                    radius: featureLayer.options.radius,
+                                    fillOpacity: featureLayer.options.fillOpacity,
+                                    weight: featureLayer.options.weight,
+                                    color: featureLayer.options.color,
+                                    opacity: featureLayer.options.opacity
+                                });
+                                
+                                // Apply highlight style with outline
+                                featureLayer.setStyle({
+                                    radius: featureLayer.options.radius * 1.5,
+                                    fillOpacity: 1,
+                                    weight: 3,
+                                    color: '#000', // Black outline
+                                    opacity: 1
+                                });
+                            } else {
+                                originalStyles.set(featureLayer, {
+                                    weight: featureLayer.options.weight,
+                                    opacity: featureLayer.options.opacity,
+                                    fillOpacity: featureLayer.options.fillOpacity,
+                                    color: featureLayer.options.color,
+                                    dashArray: featureLayer.options.dashArray
+                                });
+                                
+                                // Apply highlight style with outline effect
+                                featureLayer.setStyle({
+                                    weight: featureLayer.options.weight + 2,
+                                    opacity: 1,
+                                    fillOpacity: 0.7,
+                                    color: '#000', // Black outline
+                                    dashArray: '5, 10' // Dashed outline for better visibility
+                                });
+                            }
+                            
+                            // Add to our tracking collection
+                            highlightedFeatures.push(featureLayer);
+                            
+                            // Bring to front to ensure visibility
+                            if (featureLayer.bringToFront) {
+                                featureLayer.bringToFront();
+                            }
+                        }
+                        index++;
+                    });
+                });
+                
+                // If we have highlighted features, fit the map to show them all
+                if (highlightedFeatures.length > 0) {
+                    try {
+                        // Create a temporary feature group just for bounds calculation
+                        // (but don't add it to the map)
+                        const boundsGroup = L.featureGroup(highlightedFeatures);
+                        const bounds = boundsGroup.getBounds();
+                        if (bounds.isValid()) {
+                            map.fitBounds(bounds, { padding: [50, 50] });
+                        }
+                    } catch (error) {
+                        console.error("Error fitting bounds to selected features:", error);
+                    }
+                }
+                
+                // Show a notification with a clear button
+                const notification = document.createElement('div');
+                notification.className = 'sampling-notification';
+                notification.id = 'highlight-notification';
+                notification.innerHTML = `
+                    <div class="notification-icon">🔍</div>
+                    <div class="notification-content">
+                        <h4>Features Highlighted</h4>
+                        <p>${highlightedFeatures.length} selected features are now highlighted on the map.</p>
+                    </div>
+                    <button class="notification-clear-highlights">Clear Highlights</button>
+                    <button class="notification-close">&times;</button>
+                `;
+                
+                // Function to clear highlights
+                const clearHighlights = () => {
+                    // Restore original styles
+                    highlightedFeatures.forEach(feature => {
+                        const originalStyle = originalStyles.get(feature);
+                        if (originalStyle) {
+                            feature.setStyle(originalStyle);
+                        }
+                    });
+                    
+                    // Remove notification
+                    if (document.body.contains(notification)) {
+                        notification.classList.add('notification-hiding');
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                };
+                
+                // Add clear highlights button functionality
+                const clearButton = notification.querySelector('.notification-clear-highlights');
+                clearButton.addEventListener('click', clearHighlights);
+                
+                // Add close button functionality
+                const closeButton = notification.querySelector('.notification-close');
+                closeButton.addEventListener('click', clearHighlights);
+                
+                // Add to document
+                document.body.appendChild(notification);
+                
+                // Trigger entrance animation
+                setTimeout(() => notification.classList.add('notification-visible'), 10);
+            }
+            
+            // Create a new layer from selected features
+            function copySelectedToNewLayer() {
+                // If no features selected, show message and return
+                if (virtualTable.selectedFeatures.size === 0) {
+                    alert('No features selected to copy');
+                    return;
+                }
+                
+                // Show loading notification
+                showNotification('Processing', 'Creating new layer from selected features...', 'info');
+                
+                // Use setTimeout to allow the UI to update before processing
+                setTimeout(() => {
+                    // Create a new GeoJSON FeatureCollection
+                    const newLayerFeatures = {
+                        type: 'FeatureCollection',
+                        features: []
+                    };
+                    
+                    // Track source layers for naming
+                    const sourceLayers = new Set();
+                    
+                    // Collect all selected features
+                    virtualTable.selectedFeatures.forEach(featureId => {
+                        const [layerId, featureIndex] = featureId.split('-');
+                        const layerEntry = layers.find(l => l.id === layerId);
+                        if (!layerEntry) return;
+                        
+                        sourceLayers.add(layerEntry.name);
+                        
+                        let index = 0;
+                        layerEntry.layer.eachLayer(featureLayer => {
+                            if (index === parseInt(featureIndex)) {
+                                // Get the GeoJSON representation of this feature
+                                const featureGeoJSON = featureLayer.toGeoJSON();
+                                
+                                // Add source layer information to properties
+                                if (!featureGeoJSON.properties) {
+                                    featureGeoJSON.properties = {};
+                                }
+                                featureGeoJSON.properties.sourceLayer = layerEntry.name;
+                                
+                                // Add to our collection
+                                newLayerFeatures.features.push(featureGeoJSON);
+                            }
+                            index++;
+                        });
+                    });
+                    
+                    // Generate a name for the new layer
+                    let sourceLayerNames = Array.from(sourceLayers);
+                    if (sourceLayerNames.length > 2) {
+                        sourceLayerNames = [sourceLayerNames[0], `${sourceLayerNames.length - 1} others`];
+                    }
+                    sourceLayerNames = sourceLayerNames.join(', ');
+                    
+                    const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const newLayerName = `Selection from ${sourceLayerNames} (${timestamp})`;
+                    
+                    // Create and add the new layer
+                    renderGeoJSON(newLayerFeatures, newLayerName);
+        
+                    // Update the layer filter dropdown to include the new layer
+                    updateLayerFilterOptions();
+        
+                    // Show a success notification
+                    const featureCount = newLayerFeatures.features.length;
+                    showNotification(
+                        'Layer Created', 
+                        `Created new layer "${newLayerName}" with ${featureCount} feature${featureCount !== 1 ? 's' : ''}.`,
+                        'success'
+                    );
+                    
+                    // Ask user if they want to clear the selection
+                    if (confirm('Layer created successfully. Clear the current selection?')) {
+                        clearAllSelections();
+                    }
+                }, 50);
+            }
+
+            // --- Tab Functionality ---
+            function setupTabSwitching() {
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        // Remove active class from all tabs
+                        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                        
+                        // Add active class to clicked tab
+                        button.classList.add('active');
+                        const tabId = button.dataset.tab;
+                        document.getElementById(tabId).classList.add('active');
+                        
+                        // Tab-specific initialization
+                        if (tabId === 'table-view') {
+                            // Initialize and refresh the table
+                            if (!virtualTable.initialized) {
+                                initializeVirtualTable();
+                            }
+                            refreshFeatureTable();
+                        } else if (tabId === 'io-view') {
+                            // Update the export layer list
+                            updateExportLayerList();
+                        }
+                    });
+                });
+            }
+
+            // --- Virtualized Table Implementation ---
+            const virtualTable = {
+                rowHeight: 40,           // Fixed height for each row (in pixels)
+                visibleRows: 0,          // Number of rows that fit in the viewport
+                bufferRows: 15,          // Extra rows to render above/below viewport
+                totalRows: 0,            // Total number of rows in the dataset
+                startIndex: 0,           // First visible row index
+                endIndex: 0,             // Last visible row index
+                scrollTop: 0,            // Current scroll position
+                allFeatures: [],         // Array of all features (after filtering)
+                scrollContainer: null,   // Reference to the scroll container
+                contentContainer: null,  // Reference to the content container
+                spacerElement: null,     // Element to maintain scroll height
+                initialized: false,      // Whether the virtual table has been initialized
+                propertyKeys: [],        // Current property keys for the table
+                isLoading: false,        // Whether the table is currently loading
+                selectedFeatures: new Set() // Track selected feature IDs
+            };
+
+            // Debounce function to limit how often a function can be called
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+
+            // Initialize the virtual table
+            function initializeVirtualTable() {
+                if (virtualTable.initialized) return;
+                
+                // Get references to DOM elements
+                virtualTable.scrollContainer = document.getElementById('table-container');
+                virtualTable.contentContainer = document.getElementById('feature-table-body');
+                virtualTable.spacerElement = document.getElementById('virtual-spacer');
+                virtualTable.tableElement = document.getElementById('feature-table');
+                virtualTable.loadingElement = document.getElementById('table-loading');
+                
+                // Calculate how many rows can fit in the viewport
+                const containerHeight = virtualTable.scrollContainer.clientHeight;
+                virtualTable.visibleRows = Math.ceil(containerHeight / virtualTable.rowHeight);
+                virtualTable.endIndex = virtualTable.startIndex + virtualTable.visibleRows + virtualTable.bufferRows;
+                
+                // Set up scroll event listener with debounce
+                virtualTable.scrollContainer.addEventListener('scroll', debounce(handleTableScroll, 10));
+                
+                // Set up resize observer to handle window/container resizing
+                const resizeObserver = new ResizeObserver(entries => {
+                    for (const entry of entries) {
+                        if (entry.target === virtualTable.scrollContainer) {
+                            const containerHeight = entry.contentRect.height;
+                            virtualTable.visibleRows = Math.ceil(containerHeight / virtualTable.rowHeight);
+                            virtualTable.endIndex = virtualTable.startIndex + virtualTable.visibleRows + virtualTable.bufferRows;
+                            renderVisibleRows();
+                        }
+                    }
+                });
+                
+                resizeObserver.observe(virtualTable.scrollContainer);
+                
+                // Add virtualized class to the table
+                virtualTable.tableElement.classList.add('virtualized');
+                
+                virtualTable.initialized = true;
+            }
+
+            // Handle table scrolling
+            function handleTableScroll() {
+                const scrollTop = virtualTable.scrollContainer.scrollTop;
+                
+                // Calculate the new start index based on scroll position
+                const newStartIndex = Math.floor(scrollTop / virtualTable.rowHeight);
+                
+                // Only re-render if we've scrolled to a new row
+                if (newStartIndex !== virtualTable.startIndex) {
+                    virtualTable.startIndex = Math.max(0, newStartIndex - virtualTable.bufferRows);
+                    virtualTable.endIndex = Math.min(
+                        virtualTable.totalRows,
+                        newStartIndex + virtualTable.visibleRows + virtualTable.bufferRows
+                    );
+                    
+                    renderVisibleRows();
+                }
+            }
+
+            // Show loading indicator
+            function showTableLoading() {
+                virtualTable.isLoading = true;
+                virtualTable.loadingElement.classList.add('active');
+            }
+
+            // Hide loading indicator
+            function hideTableLoading() {
+                virtualTable.isLoading = false;
+                virtualTable.loadingElement.classList.remove('active');
+            }
+
+            // Prepare table data (collect all features that match current filters)
+            function prepareTableData() {
+                showTableLoading();
+                
+                // Use setTimeout to allow the loading indicator to appear
+                setTimeout(() => {
+                    const layerFilter = document.getElementById('layer-filter');
+                    const searchInput = document.getElementById('property-search');
+                    const searchTerm = searchInput.value.toLowerCase();
+                    const selectedLayer = layerFilter.value;
+                    
+                    // Reset the feature array but don't clear selections
+                    virtualTable.allFeatures = [];
+                    
+                    // Get all unique property keys for columns
+                    virtualTable.propertyKeys = getAllPropertyKeys();
+                    
+                    // Update table headers
+                    updateTableHeaders(virtualTable.propertyKeys);
+                    
+                    // Track which features are filtered out
+                    let totalFeatureCount = 0;
+                    let filteredFeatureCount = 0;
+                    
+                    // Collect all features that match the current filters
+                    layers.forEach(layerEntry => {
+                        // Skip layers that don't match the layer filter
+                        if (selectedLayer !== 'all' && layerEntry.id !== selectedLayer) return;
+                        if (!layerEntry.visible) return;
+                        
+                        let featureIndex = 0;
+                        layerEntry.layer.eachLayer(featureLayer => {
+                            const properties = featureLayer.feature.properties || {};
+                            totalFeatureCount++;
+                            
+                            // Apply search filter if search term exists
+                            let includeFeature = true;
+                            if (searchTerm) {
+                                let matchFound = false;
+                                for (const key in properties) {
+                                    const value = String(properties[key] || '').toLowerCase();
+                                    if (value.includes(searchTerm)) {
+                                        matchFound = true;
+                                        break;
+                                    }
+                                }
+                                if (!matchFound) {
+                                    includeFeature = false;
+                                }
+                            }
+                            
+                            if (includeFeature) {
+                                // Add feature to our collection
+                                virtualTable.allFeatures.push({
+                                    layerId: layerEntry.id,
+                                    layerName: layerEntry.name,
+                                    layerColor: layerEntry.color,
+                                    featureIndex: featureIndex,
+                                    properties: properties
+                                });
+                                filteredFeatureCount++;
+                            }
+                            
+                            featureIndex++;
+                        });
+                    });
+                    
+                    // Update total rows count
+                    virtualTable.totalRows = virtualTable.allFeatures.length;
+                    
+                    // Update spacer height to maintain scroll area
+                    virtualTable.spacerElement.style.height = `${virtualTable.totalRows * virtualTable.rowHeight}px`;
+                    
+                    // Reset scroll position when data changes
+                    virtualTable.startIndex = 0;
+                    virtualTable.scrollContainer.scrollTop = 0;
+                    
+                    // Update table info with filter information
+                    const tableInfo = document.querySelector('.table-info');
+                    if (filteredFeatureCount < totalFeatureCount) {
+                        tableInfo.textContent = `Showing ${filteredFeatureCount.toLocaleString()} of ${totalFeatureCount.toLocaleString()} features`;
+                        tableInfo.title = `${(totalFeatureCount - filteredFeatureCount).toLocaleString()} features are filtered out`;
+                    } else {
+                        tableInfo.textContent = `Showing ${filteredFeatureCount.toLocaleString()} feature${filteredFeatureCount !== 1 ? 's' : ''}`;
+                        tableInfo.title = '';
+                    }
+                    
+                    // Update filter indicators
+                    updateFilterIndicators();
+                    
+                    // Render the initial view
+                    renderVisibleRows();
+                    
+                    // Update the selection counter
+                    updateSelectionCount();
+                    
+                    hideTableLoading();
+                }, 50); // Small delay to ensure UI updates
+            }
+
+            // Render only the currently visible rows
+            function renderVisibleRows() {
+                if (!virtualTable.initialized || virtualTable.allFeatures.length === 0) return;
+                
+                // Use DocumentFragment for better performance
+                const fragment = document.createDocumentFragment();
+                
+                // Get the subset of features to display
+                const start = virtualTable.startIndex;
+                const end = Math.min(virtualTable.endIndex, virtualTable.totalRows);
+                
+                // Position the table at the correct offset
+                virtualTable.tableElement.style.transform = `translateY(${start * virtualTable.rowHeight}px)`;
+                
+                // Clear the current content
+                virtualTable.contentContainer.innerHTML = '';
+                
+                // Render only the visible rows
+                for (let i = start; i < end; i++) {
+                    const feature = virtualTable.allFeatures[i];
+                    if (!feature) continue;
+                    
+                    const featureId = `${feature.layerId}-${feature.featureIndex}`;
+                    const isSelected = virtualTable.selectedFeatures.has(featureId);
+                    
+                    const row = document.createElement('tr');
+                    row.dataset.layerId = feature.layerId;
+                    row.dataset.featureIndex = feature.featureIndex;
+                    row.style.height = `${virtualTable.rowHeight}px`;
+                    
+                    if (isSelected) {
+                        row.classList.add('selected');
+                    }
+                    
+                    // Add checkbox cell
+                    const checkboxCell = document.createElement('td');
+                    checkboxCell.className = 'checkbox-cell';
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'feature-checkbox';
+                    checkbox.checked = isSelected;
+                    checkbox.addEventListener('change', () => {
+                        toggleFeatureSelection(featureId, checkbox.checked);
+                        if (checkbox.checked) {
+                            row.classList.add('selected');
+                        } else {
+                            row.classList.remove('selected');
+                        }
+                    });
+                    checkboxCell.appendChild(checkbox);
+                    row.appendChild(checkboxCell);
+                    
+                    // Add layer name cell
+                    const layerCell = document.createElement('td');
+                    layerCell.textContent = feature.layerName;
+                    layerCell.style.color = feature.layerColor;
+                    layerCell.style.fontWeight = 'bold';
+                    row.appendChild(layerCell);
+                    
+                    // Add feature ID cell
+                    const idCell = document.createElement('td');
+                    idCell.textContent = feature.properties.id || `Feature ${feature.featureIndex + 1}`;
+                    row.appendChild(idCell);
+                    
+                    // Add property cells
+                    virtualTable.propertyKeys.forEach(key => {
+                        const cell = document.createElement('td');
+                        if (key in feature.properties) {
+                            const value = feature.properties[key];
+                            if (value === null) {
+                                cell.innerHTML = '<em>null</em>';
+                                cell.style.color = '#999';
+                            } else if (typeof value === 'object') {
+                                cell.textContent = JSON.stringify(value);
+                            } else {
+                                cell.textContent = value;
+                            }
+                            
+                            // Highlight the cell if it matches the search term
+                            const searchTerm = document.getElementById('property-search').value.toLowerCase();
+                            if (searchTerm && String(value).toLowerCase().includes(searchTerm)) {
+                                cell.style.backgroundColor = '#fffde7';
+                                cell.style.fontWeight = 'bold';
+                            }
+                        }
+                        row.appendChild(cell);
+                    });
+                    
+                    // Add click handler to highlight feature on map
+                    row.addEventListener('click', (e) => {
+                        // Don't trigger if clicking on the checkbox
+                        if (e.target.type === 'checkbox') return;
+                        
+                        highlightFeatureOnMap(feature.layerId, feature.featureIndex);
+                        
+                        // Remove highlight from all rows
+                        document.querySelectorAll('#feature-table tbody tr').forEach(r => {
+                            r.classList.remove('highlighted');
+                        });
+                        
+                        // Add highlight to this row
+                        row.classList.add('highlighted');
+                    });
+                    
+                    // Add context menu on right-click
+                    row.addEventListener('contextmenu', (e) => {
+                        showContextMenu(e, row);
+                    });
+                    
+                    fragment.appendChild(row);
+                }
+                
+                // Add all rows at once
+                virtualTable.contentContainer.appendChild(fragment);
+            }
+
+            // Update table headers
+            function updateTableHeaders(propertyKeys) {
+                const tableHead = document.querySelector('#feature-table thead tr');
+                
+                // Reset headers
+                tableHead.innerHTML = '';
+                
+                // Add checkbox header
+                const checkboxHeader = document.createElement('th');
+                checkboxHeader.className = 'checkbox-cell';
+                tableHead.appendChild(checkboxHeader);
+                
+                // Add standard headers
+                const layerHeader = document.createElement('th');
+                layerHeader.textContent = 'Layer';
+                tableHead.appendChild(layerHeader);
+                
+                const idHeader = document.createElement('th');
+                idHeader.textContent = 'Feature ID';
+                tableHead.appendChild(idHeader);
+                
+                // Add property columns to header
+                propertyKeys.forEach(key => {
+                    const th = document.createElement('th');
+                    th.textContent = key;
+                    tableHead.appendChild(th);
+                });
+            }
+
+            // Replace the existing refreshFeatureTable function with this virtualized version
+            function refreshFeatureTable() {
+                // Initialize virtual table if not already done
+                if (!virtualTable.initialized) {
+                    initializeVirtualTable();
+                }
+                
+                // Update layer filter options
+                updateLayerFilterOptions();
+                
+                // Prepare and render the data
+                prepareTableData();
+                
+                // Update the selection counter
+                updateSelectionCount();
+            }
+
+            // Get all unique property keys across all features
+            function getAllPropertyKeys() {
+                const keys = new Set();
+                const selectedLayer = document.getElementById('layer-filter').value;
+                
+                layers.forEach(layerEntry => {
+                    if (!layerEntry.visible) return;
+                    if (selectedLayer !== 'all' && layerEntry.id !== selectedLayer) return;
+                    
+                    layerEntry.layer.eachLayer(featureLayer => {
+                        const properties = featureLayer.feature.properties || {};
+                        Object.keys(properties).forEach(key => keys.add(key));
+                    });
+                });
+                
+                return Array.from(keys).sort();
+            }
+
+            // Update layer filter dropdown options
+            function updateLayerFilterOptions() {
+                const layerFilter = document.getElementById('layer-filter');
+                
+                // Save current selection
+                const currentSelection = layerFilter.value;
+                
+                // Clear existing options (except "All Layers")
+                while (layerFilter.options.length > 1) {
+                    layerFilter.remove(1);
+                }
+                
+                // Add option for each layer
+                layers.forEach(layerEntry => {
+                    if (!layerEntry.visible) return; // Skip hidden layers
+                    
+                    const option = document.createElement('option');
+                    option.value = layerEntry.id;
+                    option.textContent = layerEntry.name;
+                    layerFilter.appendChild(option);
+                });
+                
+                // Restore selection if possible
+                if (currentSelection && [...layerFilter.options].some(opt => opt.value === currentSelection)) {
+                    layerFilter.value = currentSelection;
+                }
+            }
+
+            // Highlight feature on map when row is clicked
+            function highlightFeatureOnMap(layerId, featureIndex) {
+                const layerEntry = layers.find(l => l.id === layerId);
+                if (!layerEntry) return;
+                
+                let index = 0;
+                let targetFeature = null;
+                
+                layerEntry.layer.eachLayer(featureLayer => {
+                    if (index === parseInt(featureIndex)) {
+                        targetFeature = featureLayer;
+                    }
+                    index++;
+                });
+                
+                if (targetFeature) {
+                    // Switch to map view
+                    document.querySelector('.tab-button[data-tab="map-view"]').click();
+                    
+                    // Reset previous highlight if exists
+                    if (currentHighlightedFeature) {
+                        if (currentHighlightedFeature instanceof L.CircleMarker) {
+                            // For point features
+                            currentHighlightedFeature.setStyle({
+                                radius: currentHighlightedFeature.options.originalRadius || currentHighlightedFeature.options.radius,
+                                fillOpacity: 0.8
+                            });
+                        } else {
+                            // For line/polygon features
+                            currentHighlightedFeature.setStyle({
+                                weight: currentHighlightedFeature.options.originalWeight || 2,
+                                opacity: 0.8
+                            });
+                        }
+                    }
+                    
+                    // Highlight the feature
+                    if (targetFeature instanceof L.CircleMarker) {
+                        // For point features
+                        targetFeature.options.originalRadius = targetFeature.options.radius;
+                        targetFeature.setStyle({
+                            radius: targetFeature.options.radius + 4,
+                            fillOpacity: 1
+                        });
+                    } else {
+                        // For line/polygon features
+                        targetFeature.options.originalWeight = targetFeature.options.weight;
+                        targetFeature.setStyle({
+                            weight: targetFeature.options.weight + 2,
+                            opacity: 1
+                        });
+                    }
+                    
+                    currentHighlightedFeature = targetFeature;
+                    
+                    // Zoom to feature
+                    try {
+                        const bounds = targetFeature.getBounds ? 
+                            targetFeature.getBounds() : 
+                            L.latLngBounds(targetFeature.getLatLng(), targetFeature.getLatLng());
+                        
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                        
+                        // Open popup
+                        if (targetFeature.getLatLng) {
+                            targetFeature.openPopup();
+                        } else {
+                            const center = bounds.getCenter();
+                            targetFeature.openPopup(center);
+                        }
+                    } catch (error) {
+                        console.error("Error zooming to feature:", error);
+                    }
+                }
+            }
+
+            // Setup event listeners for table controls
+            function setupTableControls() {
+                const layerFilter = document.getElementById('layer-filter');
+                const searchInput = document.getElementById('property-search');
+                const searchClear = document.getElementById('search-clear');
+                const selectAllBtn = document.getElementById('select-all');
+                const selectNoneBtn = document.getElementById('select-none');
+                const mapSelectedBtn = document.getElementById('map-selected');
+                const resetFiltersBtn = document.getElementById('reset-filters');
+                
+                // Layer filter change handler
+                layerFilter.addEventListener('change', () => {
+                    refreshFeatureTable();
+                    updateFilterIndicators();
+                });
+                
+                // Search input handlers
+                let searchTimeout;
+                searchInput.addEventListener('input', () => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        refreshFeatureTable();
+                        // Show/hide clear button based on input content
+                        if (searchInput.value) {
+                            searchClear.style.display = 'block';
+                        } else {
+                            searchClear.style.display = 'none';
+                        }
+                        updateFilterIndicators();
+                    }, 300);
+                });
+                
+                // Clear search button
+                searchClear.addEventListener('click', () => {
+                    searchInput.value = '';
+                    searchClear.style.display = 'none';
+                    refreshFeatureTable();
+                    updateFilterIndicators();
+                });
+                
+                // Selection control buttons
+                selectAllBtn.addEventListener('click', selectAllFeatures);
+                selectNoneBtn.addEventListener('click', clearAllSelections);
+                mapSelectedBtn.addEventListener('click', mapSelectedFeatures);
+                const copyToLayerBtn = document.getElementById('copy-to-layer');
+                copyToLayerBtn.addEventListener('click', copySelectedToNewLayer);
+                
+                // Reset filters button
+                resetFiltersBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    searchClear.style.display = 'none';
+                    layerFilter.value = 'all';
+                    refreshFeatureTable();
+                    updateFilterIndicators();
+                });
+                
+                // Initialize clear button visibility
+                searchClear.style.display = searchInput.value ? 'block' : 'none';
+                
+                // Initialize filter indicators
+                updateFilterIndicators();
             }
 
             // --- Event Listeners Setup ---
@@ -941,10 +4540,488 @@
                 }
             });
 
+            // Update visual indicators for active filters
+            function updateFilterIndicators() {
+                const layerFilter = document.getElementById('layer-filter');
+                const searchInput = document.getElementById('property-search');
+                const resetFiltersBtn = document.getElementById('reset-filters');
+                
+                // Show/hide reset button based on filter state
+                if (layerFilter.value !== 'all' || searchInput.value) {
+                    resetFiltersBtn.classList.add('active');
+                } else {
+                    resetFiltersBtn.classList.remove('active');
+                }
+                
+                // Add visual indicator to layer filter if not showing all layers
+                if (layerFilter.value !== 'all') {
+                    layerFilter.classList.add('filter-active');
+                } else {
+                    layerFilter.classList.remove('filter-active');
+                }
+                
+                // Add visual indicator to search input if it has content
+                if (searchInput.value) {
+                    searchInput.classList.add('filter-active');
+                } else {
+                    searchInput.classList.remove('filter-active');
+                }
+            }
+
+            // --- I/O Tab Functionality ---
+
+            // Initialize the I/O tab
+            function initializeIOTab() {
+                // Set up event listeners for import functionality
+                document.getElementById('import-text').addEventListener('click', importFromText);
+                document.getElementById('import-clipboard').addEventListener('click', importFromClipboard);
+                document.getElementById('clear-text').addEventListener('click', clearTextArea);
+                document.getElementById('fetch-url').addEventListener('click', fetchFromUrl);
+                
+                // Set up event listeners for export functionality
+                document.getElementById('copy-geojson').addEventListener('click', copyGeoJSONToClipboard);
+                document.getElementById('download-geojson').addEventListener('click', downloadGeoJSONFiles);
+                document.getElementById('select-all-layers').addEventListener('click', selectAllExportLayers);
+                document.getElementById('select-none-layers').addEventListener('click', selectNoExportLayers);
+                
+                // Set up file drop area
+                const fileDropArea = document.getElementById('io-file-drop');
+                const fileInput = document.getElementById('io-file-input');
+                
+                fileDropArea.addEventListener('dragenter', (e) => {
+                    e.preventDefault();
+                    fileDropArea.classList.add('active');
+                });
+                
+                fileDropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                
+                fileDropArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    if (!fileDropArea.contains(e.relatedTarget)) {
+                        fileDropArea.classList.remove('active');
+                    }
+                });
+                
+                fileDropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fileDropArea.classList.remove('active');
+                    
+                    if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+                        handleFiles(e.dataTransfer.files);
+                    }
+                });
+                
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        handleFiles(e.target.files);
+                    }
+                });
+                
+                // Update export layer list when tab is shown
+                updateExportLayerList();
+            }
+
+            // Import from text area
+            function importFromText() {
+                const textArea = document.getElementById('geojson-input');
+                const text = textArea.value.trim();
+                
+                if (!text) {
+                    alert('Please enter or paste GeoJSON data first.');
+                    return;
+                }
+                
+                try {
+                    const geojsonData = JSON.parse(text);
+                    
+                    // Basic validation
+                    if (!geojsonData || !geojsonData.type) {
+                        throw new Error("Invalid GeoJSON structure: missing 'type' property.");
+                    }
+                    
+                    // Generate a filename based on the current time
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                    const filename = `imported_${timestamp}.geojson`;
+                    
+                    // Render the GeoJSON
+                    renderGeoJSON(geojsonData, filename);
+                    
+                    // Show success message
+                    showNotification('Import Successful', 'GeoJSON data has been imported and added to the map.', 'success');
+                    
+                    // Switch to map view
+                    document.querySelector('.tab-button[data-tab="map-view"]').click();
+                    
+                    // Clear the text area
+                    textArea.value = '';
+                } catch (error) {
+                    console.error('Error parsing GeoJSON:', error);
+                    alert(`Failed to parse GeoJSON: ${error.message}`);
+                }
+            }
+
+            // Import from clipboard
+            function importFromClipboard() {
+                navigator.clipboard.readText()
+                    .then(text => {
+                        if (!text.trim()) {
+                            alert('Clipboard is empty or contains non-text content.');
+                            return;
+                        }
+                        
+                        // Set the text to the textarea
+                        document.getElementById('geojson-input').value = text;
+                        
+                        // Import the text
+                        importFromText();
+                    })
+                    .catch(err => {
+                        console.error('Failed to read clipboard:', err);
+                        alert('Failed to read from clipboard. Please check browser permissions.');
+                    });
+            }
+
+            // Clear text area
+            function clearTextArea() {
+                document.getElementById('geojson-input').value = '';
+            }
+
+            // Fetch GeoJSON from URL
+            function fetchFromUrl() {
+                const urlInput = document.getElementById('geojson-url');
+                const url = urlInput.value.trim();
+                
+                if (!url) {
+                    alert('Please enter a URL.');
+                    return;
+                }
+                
+                // Show loading notification
+                showNotification('Fetching Data', 'Downloading GeoJSON from URL...', 'info');
+                
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Extract filename from URL
+                        const urlParts = url.split('/');
+                        let filename = urlParts[urlParts.length - 1];
+                        
+                        // If no filename or it doesn't end with .geojson, create a generic one
+                        if (!filename || !filename.endsWith('.geojson')) {
+                            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                            filename = `fetched_${timestamp}.geojson`;
+                        }
+                        
+                        // Render the GeoJSON
+                        renderGeoJSON(data, filename);
+                        
+                        // Show success message
+                        showNotification('Fetch Successful', 'GeoJSON data has been downloaded and added to the map.', 'success');
+                        
+                        // Switch to map view
+                        document.querySelector('.tab-button[data-tab="map-view"]').click();
+                        
+                        // Clear the URL input
+                        urlInput.value = '';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching GeoJSON:', error);
+                        showNotification('Fetch Failed', `Error: ${error.message}`, 'warning');
+                    });
+            }
+
+            // Update the export layer list
+            function updateExportLayerList() {
+                const exportLayerList = document.getElementById('export-layer-list');
+                const noLayersMessage = exportLayerList.querySelector('.no-layers-message');
+                
+                // Remove existing layer items (except the no-layers message)
+                const existingItems = exportLayerList.querySelectorAll('.export-layer-item');
+                existingItems.forEach(item => item.remove());
+                
+                // Show/hide no layers message
+                if (layers.length === 0) {
+                    if (noLayersMessage) {
+                        noLayersMessage.style.display = 'block';
+                    } else {
+                        const message = document.createElement('div');
+                        message.className = 'no-layers-message';
+                        message.textContent = 'No layers available for export';
+                        exportLayerList.appendChild(message);
+                    }
+                    
+                    // Disable export buttons
+                    document.getElementById('copy-geojson').disabled = true;
+                    document.getElementById('download-geojson').disabled = true;
+                    document.getElementById('select-all-layers').disabled = true;
+                    document.getElementById('select-none-layers').disabled = true;
+                    
+                    return;
+                }
+                
+                // Hide no layers message
+                if (noLayersMessage) {
+                    noLayersMessage.style.display = 'none';
+                }
+                
+                // Enable export buttons
+                document.getElementById('copy-geojson').disabled = false;
+                document.getElementById('download-geojson').disabled = false;
+                document.getElementById('select-all-layers').disabled = false;
+                document.getElementById('select-none-layers').disabled = false;
+                
+                // Add items for each layer
+                layers.forEach(layerEntry => {
+                    const item = document.createElement('div');
+                    item.className = 'export-layer-item';
+                    
+                    // Count features in this layer
+                    let featureCount = 0;
+                    layerEntry.layer.eachLayer(() => { featureCount++; });
+                    
+                    // Create checkbox and label
+                    const label = document.createElement('label');
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = layerEntry.id;
+                    checkbox.checked = true; // Default to checked
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'export-layer-name';
+                    nameSpan.textContent = layerEntry.name;
+                    nameSpan.style.color = layerEntry.color;
+                    
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'export-layer-count';
+                    countSpan.textContent = `(${featureCount} feature${featureCount !== 1 ? 's' : ''})`;
+                    
+                    label.appendChild(checkbox);
+                    label.appendChild(nameSpan);
+                    label.appendChild(countSpan);
+                    
+                    item.appendChild(label);
+                    exportLayerList.appendChild(item);
+                });
+            }
+
+            // Select all export layers
+            function selectAllExportLayers() {
+                const checkboxes = document.querySelectorAll('#export-layer-list input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+            }
+
+            // Select no export layers
+            function selectNoExportLayers() {
+                const checkboxes = document.querySelectorAll('#export-layer-list input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
+
+            // Get selected layer IDs for export
+            function getSelectedLayerIds() {
+                const checkboxes = document.querySelectorAll('#export-layer-list input[type="checkbox"]:checked');
+                return Array.from(checkboxes).map(checkbox => checkbox.value);
+            }
+
+            // Export selected layers
+            function exportSelectedLayers() {
+                const selectedLayerIds = getSelectedLayerIds();
+                
+                if (selectedLayerIds.length === 0) {
+                    alert('Please select at least one layer to export');
+                    return null;
+                }
+                
+                const mergeIntoSingle = document.querySelector('input[name="export-mode"][value="merge"]').checked;
+                const prettyPrint = document.getElementById('pretty-print').checked;
+                
+                // Filter layers based on selection
+                const layersToExport = layers.filter(layer => selectedLayerIds.includes(layer.id));
+                
+                if (mergeIntoSingle) {
+                    // Merge all selected layers into a single FeatureCollection
+                    const mergedFeatures = [];
+                    
+                    layersToExport.forEach(layerEntry => {
+                        layerEntry.layer.eachLayer(featureLayer => {
+                            const featureGeoJSON = featureLayer.toGeoJSON();
+                            // Add source layer information
+                            if (!featureGeoJSON.properties) {
+                                featureGeoJSON.properties = {};
+                            }
+                            featureGeoJSON.properties.sourceLayer = layerEntry.name;
+                            mergedFeatures.push(featureGeoJSON);
+                        });
+                    });
+                    
+                    const mergedGeoJSON = {
+                        type: 'FeatureCollection',
+                        features: mergedFeatures
+                    };
+                    
+                    // Format the JSON
+                    const jsonString = prettyPrint ? 
+                        JSON.stringify(mergedGeoJSON, null, 2) : 
+                        JSON.stringify(mergedGeoJSON);
+                    
+                    return [{ name: 'merged_layers.geojson', content: jsonString }];
+                } else {
+                    // Export each layer as a separate file
+                    return layersToExport.map(layerEntry => {
+                        const layerGeoJSON = layerEntry.layer.toGeoJSON();
+                        const jsonString = prettyPrint ? 
+                            JSON.stringify(layerGeoJSON, null, 2) : 
+                            JSON.stringify(layerGeoJSON);
+                        
+                        return {
+                            name: `${layerEntry.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.geojson`,
+                            content: jsonString
+                        };
+                    });
+                }
+            }
+
+            // Copy GeoJSON to clipboard
+            function copyGeoJSONToClipboard() {
+                const files = exportSelectedLayers();
+                
+                if (!files) return;
+                
+                // For clipboard, we can only copy one string, so use the first file
+                const jsonString = files[0].content;
+                
+                navigator.clipboard.writeText(jsonString)
+                    .then(() => {
+                        showNotification('Copied to Clipboard', 'GeoJSON data has been copied to your clipboard.', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        alert('Failed to copy to clipboard. Please check browser permissions.');
+                    });
+            }
+
+            // Download GeoJSON files
+            function downloadGeoJSONFiles() {
+                const files = exportSelectedLayers();
+                
+                if (!files) return;
+                
+                files.forEach(file => {
+                    const blob = new Blob([file.content], { type: 'application/geo+json' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    // Clean up
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                });
+                
+                showNotification(
+                    'Download Started', 
+                    `${files.length} file${files.length !== 1 ? 's' : ''} will be downloaded.`, 
+                    'success'
+                );
+            }
+
             // Initial UI Update (in case of any default layers - none here yet)
             updateLayerList();
             updateResetButtonVisibility();
+            
+            // Setup tab switching and table controls
+            setupTabSwitching();
+            setupTableControls();
+            
+            // Initialize the I/O tab
+            initializeIOTab();
+            
+            // Override updateLayerList to refresh table and export list when needed
+            const originalUpdateLayerList = updateLayerList;
+            updateLayerList = function() {
+                originalUpdateLayerList();
+                
+                // If table view is active, refresh it
+                if (document.getElementById('table-view').classList.contains('active')) {
+                    refreshFeatureTable();
+                }
+                
+                // If I/O view is active, update the export layer list
+                if (document.getElementById('io-view').classList.contains('active')) {
+                    updateExportLayerList();
+                }
+            };
+            
+            // Override updateFeatureCounter to refresh table when needed
+            const originalUpdateFeatureCounter = updateFeatureCounter;
+            updateFeatureCounter = function() {
+                originalUpdateFeatureCounter();
+                
+                // If table view is active, refresh it
+                if (document.getElementById('table-view').classList.contains('active')) {
+                    refreshFeatureTable();
+                }
+            };
+            
+            // Theme switching functionality
+            function setupThemeToggle() {
+                const themeSwitch = document.getElementById('theme-switch');
+                
+                // Check for saved theme preference or use default (dark)
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                themeSwitch.checked = savedTheme === 'dark';
+                
+                // Handle toggle changes
+                themeSwitch.addEventListener('change', function() {
+                    const theme = this.checked ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                });
+            }
 
+            // Call the setup function
+            setupThemeToggle();
+            
+            // Setup collapsible title box
+            function setupTitleBox() {
+                const titleBox = document.querySelector('.title-box');
+                const toggleBtn = titleBox.querySelector('.title-box-toggle');
+                
+                // Set initial state (expanded)
+                let isCollapsed = localStorage.getItem('titleBoxCollapsed') === 'true';
+                if (isCollapsed) {
+                    titleBox.classList.add('collapsed');
+                    toggleBtn.textContent = '▲';
+                }
+                
+                // Toggle collapse state when header is clicked
+                titleBox.querySelector('.title-box-header').addEventListener('click', () => {
+                    isCollapsed = !isCollapsed;
+                    titleBox.classList.toggle('collapsed', isCollapsed);
+                    toggleBtn.textContent = isCollapsed ? '▲' : '▼';
+                    localStorage.setItem('titleBoxCollapsed', isCollapsed);
+                });
+            }
+
+            // Call the setup function
+            setupTitleBox();
         }); // End DOMContentLoaded
     </script>
 
